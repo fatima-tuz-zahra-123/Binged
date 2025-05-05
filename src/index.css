@@ -1,0 +1,239 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+:root {
+  /* CSS variables are set by ThemeContext.jsx dynamically */
+  --font-primary: 'Roboto', 'Segoe UI', sans-serif;
+  --font-size-xs: 0.85rem;
+  --font-size-sm: 1rem;
+  --font-size-md: 1.2rem;
+  --font-size-lg: 1.5rem;
+  --font-size-xl: 2rem;
+  --font-size-xxl: 3rem;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-primary);
+  background-color: var(--background);
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content {
+  flex: 1;
+  background-color: var(--background);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  color: var(--primary);
+}
+
+h1 {
+  font-size: var(--font-size-xxl);
+}
+
+h2 {
+  font-size: var(--font-size-xl);
+}
+
+h3 {
+  font-size: var(--font-size-lg);
+}
+
+h4 {
+  font-size: var(--font-size-md);
+}
+
+p {
+  margin-bottom: 1rem;
+  font-size: var(--font-size-sm);
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+a:hover {
+  color: var(--secondary);
+}
+
+.button, button {
+  display: inline-block;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: var(--spacing-sm) var(--spacing-md);
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  transition: background-color var(--transition);
+  text-align: center;
+  text-decoration: none;
+  line-height: 1.5;
+}
+
+.button:hover, button:hover {
+  background-color: var(--secondary);
+}
+
+.button:disabled, button:disabled {
+  background-color: var(--textSecondary);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.button-secondary {
+  background-color: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+.button-secondary:hover {
+  background-color: rgba(229, 9, 20, 0.1);
+  color: var(--primary);
+}
+
+.card {
+  background-color: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--spacing-md);
+  transition: box-shadow var(--transition);
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.section-heading {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-md);
+  position: relative;
+  padding-left: var(--spacing-sm);
+}
+
+.section-heading:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--primary);
+  border-radius: var(--radius);
+}
+
+.page {
+  padding: var(--spacing-md);
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 80px - 80px); /* Account for navbar and footer */
+}
+
+/* Form styling */
+.form-control {
+  margin-bottom: var(--spacing-md);
+}
+
+label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-weight: 500;
+  color: var(--text);
+  font-size: var(--font-size-sm);
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  transition: border-color var(--transition);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--textSecondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Netflix-style skeleton loading animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface) 25%, #333 37%, var(--surface) 63%);
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  :root {
+    --font-size-xl: 1.8rem;
+    --font-size-lg: 1.3rem;
+  }
+  
+  .page {
+    padding: var(--spacing-sm);
+  }
+}

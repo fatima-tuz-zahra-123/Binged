@@ -1,0 +1,20 @@
+/* pages/Home.css */
+
+.home-page {
+    padding: 2rem;
+    background-color: #0F084B;
+    min-height: 100vh;
+    color: #C2E7D9;
+  }
+  
+  h2 {
+    color: #A6CFD5;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+  }
