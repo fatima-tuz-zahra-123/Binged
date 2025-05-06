@@ -6,7 +6,7 @@ import './Profile.css';
 
 const Profile = () => {
   const { currentUser, updateProfile, logout } = useUser();
-  const { theme } = useTheme();
+  const { themeColors } = useTheme();
   
   const [formData, setFormData] = useState({
     username: '',
@@ -52,6 +52,70 @@ const Profile = () => {
       setStats({ totalMovies, totalPlaylists, totalFriends });
     }
   }, [currentUser]);
+  
+  // Theme-based styles
+  const pageStyle = {
+    backgroundColor: themeColors.background, 
+    color: themeColors.text
+  };
+  
+  const sectionStyle = {
+    backgroundColor: `${themeColors.surface}CC`,
+    borderRadius: themeColors.radius,
+    boxShadow: themeColors.shadow
+  };
+
+  const avatarStyle = {
+    backgroundColor: themeColors.primary,
+    color: themeColors.surface,
+    boxShadow: `0 4px 10px ${themeColors.shadow}`
+  };
+
+  const genreTagStyle = {
+    backgroundColor: `${themeColors.primary}20`,
+    color: themeColors.primary
+  };
+
+  const genreOptionStyle = {
+    backgroundColor: `${themeColors.background}30`,
+    border: `1px solid ${themeColors.border}`,
+    color: themeColors.text
+  };
+
+  const genreOptionSelectedStyle = {
+    ...genreOptionStyle,
+    backgroundColor: themeColors.primary,
+    color: themeColors.surface,
+    borderColor: themeColors.primary
+  };
+
+  const getMessageStyle = (type) => {
+    switch (type) {
+      case 'success':
+        return { backgroundColor: 'rgba(39, 174, 96, 0.2)', color: '#2ecc71' };
+      case 'error':
+        return { backgroundColor: 'rgba(231, 76, 60, 0.2)', color: '#e74c3c' };
+      default:
+        return {};
+    }
+  };
+
+  const inputStyle = {
+    backgroundColor: `${themeColors.background}30`,
+    color: themeColors.text,
+    borderColor: themeColors.border
+  };
+
+  const buttonStyle = {
+    backgroundColor: themeColors.primary,
+    color: themeColors.surface
+  };
+
+  const secondaryButtonStyle = {
+    backgroundColor: 'transparent',
+    color: themeColors.primary,
+    borderColor: themeColors.primary
+  };
   
   if (!currentUser) {
     return <Navigate to="/login" />;
@@ -133,52 +197,52 @@ const Profile = () => {
   };
   
   return (
-    <div className="page profile-page">
+    <div className="page profile-page" style={pageStyle}>
       <div className="profile-header">
-        <div className="profile-avatar">
+        <div className="profile-avatar" style={avatarStyle}>
           {currentUser.username ? currentUser.username.charAt(0).toUpperCase() : 'U'}
         </div>
         <div className="profile-info">
-          <h2>{currentUser.username}</h2>
-          <p className="profile-email">{currentUser.email}</p>
+          <h2 style={{color: themeColors.primary}}>{currentUser.username}</h2>
+          <p className="profile-email" style={{color: themeColors.textSecondary}}>{currentUser.email}</p>
           <div className="profile-stats">
             <div className="stat">
-              <span className="stat-value">{stats.totalPlaylists}</span>
-              <span className="stat-label">Playlists</span>
+              <span className="stat-value" style={{color: themeColors.primary}}>{stats.totalPlaylists}</span>
+              <span className="stat-label" style={{color: themeColors.textSecondary}}>Playlists</span>
             </div>
             <div className="stat">
-              <span className="stat-value">{stats.totalMovies}</span>
-              <span className="stat-label">Movies</span>
+              <span className="stat-value" style={{color: themeColors.primary}}>{stats.totalMovies}</span>
+              <span className="stat-label" style={{color: themeColors.textSecondary}}>Movies</span>
             </div>
             <div className="stat">
-              <span className="stat-value">{stats.totalFriends}</span>
-              <span className="stat-label">Friends</span>
+              <span className="stat-value" style={{color: themeColors.primary}}>{stats.totalFriends}</span>
+              <span className="stat-label" style={{color: themeColors.textSecondary}}>Friends</span>
             </div>
           </div>
         </div>
       </div>
       
       {message && (
-        <div className={`message ${message.type}`}>
+        <div className={`message ${message.type}`} style={getMessageStyle(message.type)}>
           {message.text}
         </div>
       )}
       
       {mode === 'view' ? (
         <div className="profile-view">
-          <div className="profile-section">
-            <h3>About</h3>
+          <div className="profile-section" style={sectionStyle}>
+            <h3 style={{color: themeColors.primary}}>About</h3>
             <p>{currentUser.bio || 'No bio added yet.'}</p>
           </div>
           
-          <div className="profile-section">
-            <h3>Favorite Genres</h3>
+          <div className="profile-section" style={sectionStyle}>
+            <h3 style={{color: themeColors.primary}}>Favorite Genres</h3>
             <div className="genre-tags">
               {currentUser.favoriteGenres && currentUser.favoriteGenres.length > 0 ? 
                 currentUser.favoriteGenres.map(genre => (
-                  <span key={genre} className="genre-tag">{genre}</span>
+                  <span key={genre} className="genre-tag" style={genreTagStyle}>{genre}</span>
                 )) : 
-                <p>No favorite genres selected yet.</p>
+                <p style={{color: themeColors.textSecondary}}>No favorite genres selected yet.</p>
               }
             </div>
           </div>
@@ -187,12 +251,14 @@ const Profile = () => {
             <button 
               className="button"
               onClick={() => setMode('edit')}
+              style={buttonStyle}
             >
               Edit Profile
             </button>
             <button 
               className="button button-secondary"
               onClick={handleLogout}
+              style={secondaryButtonStyle}
             >
               Log Out
             </button>
@@ -202,7 +268,7 @@ const Profile = () => {
         <div className="profile-edit">
           <form onSubmit={handleSubmit}>
             <div className="form-control">
-              <label htmlFor="username">Username</label>
+              <label htmlFor="username" style={{color: themeColors.textSecondary}}>Username</label>
               <input
                 type="text"
                 id="username"
@@ -210,22 +276,24 @@ const Profile = () => {
                 value={formData.username}
                 onChange={handleInputChange}
                 required
+                style={inputStyle}
               />
             </div>
             
             <div className="form-control">
-              <label htmlFor="email">Email (cannot be changed)</label>
+              <label htmlFor="email" style={{color: themeColors.textSecondary}}>Email (cannot be changed)</label>
               <input
                 type="email"
                 id="email"
                 name="email"
                 value={formData.email}
                 disabled
+                style={{...inputStyle, opacity: 0.7}}
               />
             </div>
             
             <div className="form-control">
-              <label htmlFor="password">Password (leave blank to keep current)</label>
+              <label htmlFor="password" style={{color: themeColors.textSecondary}}>Password (leave blank to keep current)</label>
               <input
                 type="password"
                 id="password"
@@ -233,11 +301,12 @@ const Profile = () => {
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="••••••••"
+                style={inputStyle}
               />
             </div>
             
             <div className="form-control">
-              <label htmlFor="confirmPassword">Confirm Password</label>
+              <label htmlFor="confirmPassword" style={{color: themeColors.textSecondary}}>Confirm Password</label>
               <input
                 type="password"
                 id="confirmPassword"
@@ -245,11 +314,12 @@ const Profile = () => {
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 placeholder="••••••••"
+                style={inputStyle}
               />
             </div>
             
             <div className="form-control">
-              <label htmlFor="bio">Bio</label>
+              <label htmlFor="bio" style={{color: themeColors.textSecondary}}>Bio</label>
               <textarea
                 id="bio"
                 name="bio"
@@ -257,17 +327,19 @@ const Profile = () => {
                 onChange={handleInputChange}
                 rows="4"
                 placeholder="Tell us about yourself and your movie tastes..."
+                style={inputStyle}
               />
             </div>
             
             <div className="form-control">
-              <label>Favorite Genres</label>
+              <label style={{color: themeColors.textSecondary}}>Favorite Genres</label>
               <div className="genre-selector">
                 {genres.map(genre => (
                   <div 
                     key={genre}
                     className={`genre-option ${formData.favoriteGenres.includes(genre) ? 'selected' : ''}`}
                     onClick={() => handleGenreToggle(genre)}
+                    style={formData.favoriteGenres.includes(genre) ? genreOptionSelectedStyle : genreOptionStyle}
                   >
                     {genre}
                   </div>
@@ -279,6 +351,7 @@ const Profile = () => {
               <button 
                 type="submit"
                 className="button"
+                style={buttonStyle}
               >
                 Save Changes
               </button>
@@ -286,6 +359,7 @@ const Profile = () => {
                 type="button"
                 className="button button-secondary"
                 onClick={() => setMode('view')}
+                style={secondaryButtonStyle}
               >
                 Cancel
               </button>

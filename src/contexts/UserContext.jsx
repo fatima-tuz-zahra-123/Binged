@@ -130,17 +130,52 @@ export const UserProvider = ({ children }) => {
     const otherUser = users.find(user => user.id === userId);
     if (!otherUser) return 0;
     
-    // Compare liked movies
-    const myLiked = new Set(currentUser.likedMovies.map(m => m.id));
-    const theirLiked = new Set(otherUser.likedMovies.map(m => m.id));
+    // Compare liked movies - safely handle missing arrays with default empty arrays
+    const myLiked = new Set((currentUser.likedMovies || []).map(m => m.id));
+    const theirLiked = new Set((otherUser.likedMovies || []).map(m => m.id));
     
-    // Intersection of liked movies
-    const commonLikes = [...myLiked].filter(id => theirLiked.has(id));
+    // Get movie IDs from playlists
+    const myPlaylistMovies = new Set();
+    const theirPlaylistMovies = new Set();
     
-    // Calculate compatibility percentage (simplified)
-    const totalMovies = new Set([...myLiked, ...theirLiked]);
-    const compatibilityScore = totalMovies.size > 0 
-      ? Math.round((commonLikes.length / totalMovies.size) * 100)
+    // Extract movie IDs from current user's playlists
+    if (currentUser.playlists && currentUser.playlists.length > 0) {
+      currentUser.playlists.forEach(playlist => {
+        if (playlist.movies && playlist.movies.length > 0) {
+          playlist.movies.forEach(movie => {
+            if (movie && movie.id) {
+              myPlaylistMovies.add(movie.id);
+            }
+          });
+        }
+      });
+    }
+    
+    // Extract movie IDs from other user's playlists
+    if (otherUser.playlists && otherUser.playlists.length > 0) {
+      otherUser.playlists.forEach(playlist => {
+        if (playlist.movies && playlist.movies.length > 0) {
+          playlist.movies.forEach(movie => {
+            if (movie && movie.id) {
+              theirPlaylistMovies.add(movie.id);
+            }
+          });
+        }
+      });
+    }
+    
+    // Combine liked movies with playlist movies
+    const allMyMovies = new Set([...myLiked, ...myPlaylistMovies]);
+    const allTheirMovies = new Set([...theirLiked, ...theirPlaylistMovies]);
+    
+    // Intersection of all movies (common movies)
+    const commonMovies = [...allMyMovies].filter(id => allTheirMovies.has(id));
+    
+    // Calculate compatibility percentage
+    const totalUniqueMovies = new Set([...allMyMovies, ...allTheirMovies]);
+    
+    const compatibilityScore = totalUniqueMovies.size > 0 
+      ? Math.round((commonMovies.length / totalUniqueMovies.size) * 100)
       : 0;
     
     return compatibilityScore;

@@ -4,7 +4,7 @@ import { useUser } from '../src/contexts/UserContext';
 import './Social.css';
 
 const Social = () => {
-  const { currentUser, users, addFriend, acceptFriendRequest, getActiveFriends, getFriendRequests, calculateBlendCompatibility } = useUser();
+  const { currentUser, users, addFriend, acceptFriendRequest, getActiveFriends, getFriendRequests } = useUser();
   const [friends, setFriends] = useState([]);
   const [friendRequests, setFriendRequests] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');

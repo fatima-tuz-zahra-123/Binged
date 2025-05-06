@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { fetchNowPlayingMovies } from '../services/tmdbService';
 import MovieCard from '../components/MovieCard';
 import SearchBar from '../components/SearchBar';
+import { useTheme } from '../src/contexts/ThemeContext';
 
 import './Home.css';
 
 const Home = () => {
+  const { themeColors } = useTheme();
   const [movies, setMovies] = useState([]);
   const [query, setQuery] = useState('');
 
@@ -32,9 +34,19 @@ const Home = () => {
     movie.title.toLowerCase().includes(query.toLowerCase())
   );
 
+  // Apply theme-based styling
+  const homeStyle = {
+    backgroundColor: themeColors.background,
+    color: themeColors.text,
+  };
+
+  const titleStyle = {
+    color: themeColors.primary
+  };
+
   return (
-    <div className="home-page">
-      <h2 className="title">Now Playing 🎬</h2>
+    <div className="home-page" style={homeStyle}>
+      <h2 className="title" style={titleStyle}>Now Playing 🎬</h2>
 
       <SearchBar query={query} setQuery={setQuery} />
 

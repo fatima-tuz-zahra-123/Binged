@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from "../src/contexts/UserContext";
+import { useTheme } from "../src/contexts/ThemeContext";
 import "./PlaylistDropdown.css";
 
 const PlaylistDropdown = ({ movie, onPlaylistSelected, onClose }) => {
   const { currentUser, updateProfile } = useUser();
+  const { themeColors } = useTheme();
   const [selected, setSelected] = useState("");
   const [playlists, setPlaylists] = useState([]);
   const [showCreateNew, setShowCreateNew] = useState(false);
@@ -121,15 +123,63 @@ const PlaylistDropdown = ({ movie, onPlaylistSelected, onClose }) => {
     }
   };
 
+  // Apply theme-based styling
+  const dropdownStyle = {
+    backgroundColor: themeColors.surface,
+    color: themeColors.text,
+    borderColor: themeColors.border,
+    boxShadow: themeColors.shadow
+  };
+
+  const headerStyle = {
+    borderBottomColor: themeColors.border
+  };
+
+  const inputStyle = {
+    backgroundColor: `${themeColors.background}30`,
+    color: themeColors.text,
+    borderColor: themeColors.border
+  };
+
+  const primaryBtnStyle = {
+    backgroundColor: themeColors.primary,
+    color: themeColors.surface
+  };
+
+  const secondaryBtnStyle = {
+    backgroundColor: 'transparent',
+    color: themeColors.textSecondary,
+    borderColor: themeColors.border
+  };
+
+  const getMessageStyle = (type) => {
+    switch (type) {
+      case 'error':
+        return { backgroundColor: 'rgba(255, 0, 0, 0.1)', color: '#ff3b3b' };
+      case 'success':
+        return { backgroundColor: 'rgba(39, 174, 96, 0.1)', color: '#2ecc71' };
+      case 'info':
+        return { backgroundColor: 'rgba(52, 152, 219, 0.1)', color: '#3498db' };
+      default:
+        return {};
+    }
+  };
+
   return (
-    <div className="playlist-dropdown">
-      <div className="dropdown-header">
-        <h4>Add to Playlist</h4>
-        <button className="close-btn" onClick={onClose}>✕</button>
+    <div className="playlist-dropdown" style={dropdownStyle}>
+      <div className="dropdown-header" style={headerStyle}>
+        <h4 style={{ color: themeColors.primary }}>Add to Playlist</h4>
+        <button 
+          className="close-btn" 
+          onClick={onClose}
+          style={{ color: themeColors.textSecondary }}
+        >
+          ✕
+        </button>
       </div>
       
       {message && (
-        <div className={`message ${message.type}`}>
+        <div className={`message ${message.type}`} style={getMessageStyle(message.type)}>
           {message.text}
         </div>
       )}
@@ -142,18 +192,21 @@ const PlaylistDropdown = ({ movie, onPlaylistSelected, onClose }) => {
             onChange={(e) => setNewPlaylistName(e.target.value)}
             placeholder="New playlist name"
             className="new-playlist-input"
+            style={inputStyle}
             autoFocus
           />
           <div className="dropdown-actions">
             <button 
               className="cancel-btn"
               onClick={() => setShowCreateNew(false)}
+              style={secondaryBtnStyle}
             >
               Cancel
             </button>
             <button 
               className="create-btn"
               onClick={handleCreatePlaylist}
+              style={primaryBtnStyle}
             >
               Create & Add
             </button>
@@ -166,6 +219,7 @@ const PlaylistDropdown = ({ movie, onPlaylistSelected, onClose }) => {
               value={selected} 
               onChange={(e) => setSelected(e.target.value)}
               className="playlist-select"
+              style={inputStyle}
             >
               <option value="">Select a playlist...</option>
               {playlists.map((playlist) => (
@@ -183,6 +237,7 @@ const PlaylistDropdown = ({ movie, onPlaylistSelected, onClose }) => {
             <button 
               className="new-btn"
               onClick={() => setShowCreateNew(true)}
+              style={secondaryBtnStyle}
             >
               New Playlist
             </button>
@@ -190,6 +245,7 @@ const PlaylistDropdown = ({ movie, onPlaylistSelected, onClose }) => {
               className="add-btn"
               onClick={handleAdd}
               disabled={!selected}
+              style={selected ? primaryBtnStyle : { ...primaryBtnStyle, opacity: 0.5 }}
             >
               Add to Playlist
             </button>

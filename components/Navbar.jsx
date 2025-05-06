@@ -5,7 +5,7 @@ import { useUser } from "../src/contexts/UserContext";
 import "./Navbar.css";
 
 const Navbar = () => {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, themeColors } = useTheme();
   const { currentUser, logout } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -47,9 +47,11 @@ const Navbar = () => {
     navigate('/');
   };
   
-  const handleNavigate = (path) => {
-    navigate(path);
+  const handleNavigate = (e) => {
+    // Stop propagation to prevent any parent handlers from capturing the event
+    e.stopPropagation();
     setMenuOpen(false);
+    setUserDropdownOpen(false);
   };
   
   // Check if a link is active based on current location
@@ -57,10 +59,16 @@ const Navbar = () => {
     return location.pathname === path ? 'active' : '';
   };
 
+  // Create a style for the navbar based on current theme
+  const navbarStyle = {
+    backgroundColor: themeColors.surface,
+    boxShadow: `0 3px 15px ${themeColors.theme === 'dark' ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)'}`,
+  };
+
   return (
-    <nav className="navbar">
+    <nav className="navbar" style={navbarStyle}>
       <div className="navbar-container">
-        <Link to="/" className="logo" onClick={() => setMenuOpen(false)}>
+        <Link to="/" className="logo" onClick={(e) => handleNavigate(e)}>
           <span className="logo-icon">🎬</span> 
           <span className="logo-text">Binged</span>
         </Link>
@@ -73,11 +81,11 @@ const Navbar = () => {
         
         <div className={`nav-content ${menuOpen ? 'active' : ''}`}>
           <div className="nav-links">
-            <Link to="/" onClick={() => setMenuOpen(false)} className={isActive('/')}>Home</Link>
-            <Link to="/discover" onClick={() => setMenuOpen(false)} className={isActive('/discover')}>Discover</Link>
-            <Link to="/playlists" onClick={() => setMenuOpen(false)} className={isActive('/playlists')}>Playlists</Link>
-            <Link to="/mood" onClick={() => setMenuOpen(false)} className={isActive('/mood')}>Mood</Link>
-            <Link to="/social" onClick={() => setMenuOpen(false)} className={isActive('/social')}>Social</Link>
+            <Link to="/" className={isActive('/')} onClick={(e) => handleNavigate(e)}>Home</Link>
+            <Link to="/discover" className={isActive('/discover')} onClick={(e) => handleNavigate(e)}>Discover</Link>
+            <Link to="/playlists" className={isActive('/playlists')} onClick={(e) => handleNavigate(e)}>Playlists</Link>
+            <Link to="/mood" className={isActive('/mood')} onClick={(e) => handleNavigate(e)}>Mood</Link>
+            <Link to="/social" className={isActive('/social')} onClick={(e) => handleNavigate(e)}>Social</Link>
           </div>
           
           <div className="nav-actions">
@@ -85,6 +93,11 @@ const Navbar = () => {
               className="theme-toggle" 
               onClick={toggleTheme}
               aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+              style={{
+                backgroundColor: `${themeColors.primary}15`,
+                borderColor: `${themeColors.primary}30`,
+                color: themeColors.primary
+              }}
             >
               {theme === 'light' ? '🌙' : '☀️'}
             </button>
@@ -95,12 +108,13 @@ const Navbar = () => {
                   className="user-avatar" 
                   onClick={toggleUserDropdown}
                   title={currentUser.username}
+                  style={{ backgroundColor: themeColors.primary }}
                 >
                   {currentUser.username.charAt(0).toUpperCase()}
                 </div>
                 
                 {userDropdownOpen && (
-                  <div className="dropdown-menu">
+                  <div className="dropdown-menu" style={{ backgroundColor: themeColors.surface }}>
                     <div className="dropdown-header">
                       <p className="dropdown-username">{currentUser.username}</p>
                       <p className="dropdown-email">{currentUser.email}</p>
@@ -108,14 +122,14 @@ const Navbar = () => {
                     <Link 
                       to="/profile" 
                       className="dropdown-item"
-                      onClick={() => setUserDropdownOpen(false)}
+                      onClick={(e) => handleNavigate(e)}
                     >
                       <i>👤</i> Profile
                     </Link>
                     <Link 
                       to="/playlists" 
                       className="dropdown-item"
-                      onClick={() => setUserDropdownOpen(false)}
+                      onClick={(e) => handleNavigate(e)}
                     >
                       <i>📋</i> My Playlists
                     </Link>
@@ -130,8 +144,8 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="auth-links">
-                <Link to="/login" className="auth-link" onClick={() => setMenuOpen(false)}>Login</Link>
-                <Link to="/signup" className="auth-link signup-link" onClick={() => setMenuOpen(false)}>Sign Up</Link>
+                <Link to="/login" className="auth-link" onClick={(e) => handleNavigate(e)}>Login</Link>
+                <Link to="/signup" className="auth-link signup-link" onClick={(e) => handleNavigate(e)}>Sign Up</Link>
               </div>
             )}
           </div>

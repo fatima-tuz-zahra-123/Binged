@@ -39,7 +39,8 @@ const MovieCard = ({ movie, showAddToPlaylist = false, onAddToPlaylist }) => {
 
   const handlePlaylistSelected = (playlistId) => {
     setShowDropdown(false);
-    // Logic to add movie to the selected playlist is handled in PlaylistDropdown
+    // Now using the playlistId parameter correctly
+    console.log(`Movie ${movie.title} added to playlist with ID: ${playlistId}`);
   };
 
   // Create a truncated overview if it's too long
@@ -54,9 +55,25 @@ const MovieCard = ({ movie, showAddToPlaylist = false, onAddToPlaylist }) => {
     ? new Date(movie.release_date).getFullYear()
     : null;
 
+  // Apply theme-based styling
+  const cardStyle = {
+    backgroundColor: themeColors.surface,
+    boxShadow: themeColors.shadow
+  };
+
+  const ratingStyle = {
+    backgroundColor: `${themeColors.surface}CC`, // Adding some transparency
+    color: themeColors.primary
+  };
+
+  const addBtnStyle = {
+    backgroundColor: themeColors.primary,
+    color: themeColors.surface
+  };
+
   return (
     <>
-      <div className="movie-card" onClick={handleCardClick} title={movie.title}>
+      <div className="movie-card" onClick={handleCardClick} title={movie.title} style={cardStyle}>
         <div className="poster-container">
           <img
             className="poster"
@@ -65,7 +82,7 @@ const MovieCard = ({ movie, showAddToPlaylist = false, onAddToPlaylist }) => {
             loading="lazy"
           />
           {movie.vote_average && (
-            <div className="rating">
+            <div className="rating" style={ratingStyle}>
               <span>⭐ {movie.vote_average.toFixed(1)}</span>
             </div>
           )}
@@ -82,6 +99,7 @@ const MovieCard = ({ movie, showAddToPlaylist = false, onAddToPlaylist }) => {
                 className="add-btn" 
                 onClick={handleAddToPlaylistClick}
                 aria-label="Add to playlist"
+                style={addBtnStyle}
               >
                 {showDropdown ? '✕' : '+'}
               </button>
