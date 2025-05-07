@@ -19,6 +19,8 @@ import Social from '../pages/Social';
 import Login from '../pages/Login';
 import Signup from '../pages/Signup';
 import Profile from '../pages/Profile';
+import MoviePage from '../pages/MoviePage';
+import ActorPage from '../pages/ActorPage';
 
 function App() {
   return (
@@ -37,6 +39,8 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/movie/:movieId" element={<MoviePage />} />
+                <Route path="/actor/:actorId" element={<ActorPage />} />
               </Routes>
             </main>
             <Footer />

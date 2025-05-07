@@ -1,0 +1,134 @@
+/* PlaylistDetail.css */
+.playlist-detail {
+  background-color: rgba(20, 20, 20, 0.7);
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  padding: var(--spacing-lg);
+  min-height: 400px;
+  border-top: 3px solid #3498db;
+}
+
+.detail-header {
+  margin-bottom: var(--spacing-lg);
+  border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+  padding-bottom: var(--spacing-md);
+}
+
+.playlist-title {
+  font-size: var(--font-size-xl);
+  color: #ffffff;
+  margin-bottom: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.playlist-title:hover {
+  color: #3498db;
+}
+
+.edit-icon {
+  font-size: 0.7em;
+  margin-left: var(--spacing-sm);
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.playlist-title:hover .edit-icon {
+  opacity: 1;
+}
+
+.name-edit-container {
+  margin-bottom: var(--spacing-sm);
+}
+
+.name-edit-input {
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-lg);
+  border-radius: 8px;
+  border: 1px solid #3498db;
+  background-color: #262626;
+  color: var(--text);
+  width: 100%;
+  max-width: 500px;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+}
+
+.edit-hint {
+  display: block;
+  color: var(--textSecondary);
+  font-size: var(--font-size-sm);
+  margin-top: 5px;
+}
+
+.playlist-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--spacing-sm);
+}
+
+.detail-movie-count {
+  font-size: var(--font-size-sm);
+  color: var(--textSecondary);
+  background-color: rgba(52, 152, 219, 0.2);
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.add-movie-btn {
+  padding: 8px 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.add-movie-btn:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+.playlist-movies {
+  margin-top: var(--spacing-lg);
+}
+
+.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.empty-playlist {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--textSecondary);
+  background-color: rgba(20, 20, 20, 0.5);
+  border-radius: 12px;
+  min-height: 200px;
+}
+
+.empty-add-btn {
+  margin-top: var(--spacing-md);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .movies-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .playlist-detail {
+    padding: var(--spacing-md);
+  }
+}

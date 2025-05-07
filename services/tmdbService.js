@@ -36,3 +36,58 @@ export const searchMovies = async (query) => {
   });
   return response.data.results;
 };
+
+// Get detailed movie information
+export const getMovieDetails = async (movieId) => {
+  try {
+    const response = await tmdb.get(`/movie/${movieId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching movie details:", error);
+    throw error;
+  }
+};
+
+// Get movie credits (cast and crew)
+export const getMovieCredits = async (movieId) => {
+  try {
+    const response = await tmdb.get(`/movie/${movieId}/credits`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching movie credits:", error);
+    throw error;
+  }
+};
+
+// Get movie reviews
+export const getMovieReviews = async (movieId) => {
+  try {
+    const response = await tmdb.get(`/movie/${movieId}/reviews`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching movie reviews:", error);
+    throw error;
+  }
+};
+
+// Get actor details
+export const getPersonDetails = async (personId) => {
+  try {
+    const response = await tmdb.get(`/person/${personId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching person details:", error);
+    throw error;
+  }
+};
+
+// Get actor's movie credits
+export const getPersonMovieCredits = async (personId) => {
+  try {
+    const response = await tmdb.get(`/person/${personId}/movie_credits`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching person movie credits:", error);
+    throw error;
+  }
+};

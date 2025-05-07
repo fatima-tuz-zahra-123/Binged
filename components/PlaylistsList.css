@@ -1,0 +1,76 @@
+/* PlaylistsList.css */
+.playlists-list {
+  background-color: rgba(20, 20, 20, 0.7);
+  border-radius: 12px;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  height: fit-content;
+}
+
+.list-title {
+  color: #ffffff;
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-md);
+  font-weight: 600;
+  position: relative;
+  padding-bottom: var(--spacing-xs);
+}
+
+.list-title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+  height: 2px;
+  background-color: #3498db;
+}
+
+.playlist-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #3498db rgba(52, 152, 219, 0.1);
+}
+
+.playlist-items::-webkit-scrollbar {
+  width: 6px;
+}
+
+.playlist-items::-webkit-scrollbar-track {
+  background: rgba(52, 152, 219, 0.1);
+  border-radius: 10px;
+}
+
+.playlist-items::-webkit-scrollbar-thumb {
+  background-color: #3498db;
+  border-radius: 10px;
+}
+
+.empty-playlists {
+  text-align: center;
+  color: var(--textSecondary);
+  padding: var(--spacing-lg);
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.empty-help {
+  font-size: var(--font-size-sm);
+  opacity: 0.7;
+  margin-top: var(--spacing-sm);
+}
+
+@media (max-width: 768px) {
+  .playlists-list {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .playlist-items {
+    max-height: 300px;
+  }
+}

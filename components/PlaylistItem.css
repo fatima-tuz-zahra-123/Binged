@@ -1,0 +1,79 @@
+/* PlaylistItem.css */
+.playlist-item {
+  background-color: rgba(26, 26, 26, 0.8);
+  border-radius: 8px;
+  margin-bottom: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.playlist-item:hover {
+  background-color: rgba(32, 32, 32, 0.9);
+  transform: translateX(2px);
+}
+
+.playlist-item.selected {
+  background-color: rgba(52, 152, 219, 0.15);
+  border-left-color: #3498db;
+}
+
+.playlist-info {
+  flex: 1;
+  min-width: 0; /* For text truncation to work */
+}
+
+.playlist-name {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-md);
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playlist-meta {
+  display: flex;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  color: var(--textSecondary);
+}
+
+.movie-count {
+  color: #3498db;
+}
+
+.playlist-date {
+  opacity: 0.8;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--textSecondary);
+  font-size: var(--font-size-lg);
+  padding: 3px 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  margin-left: var(--spacing-sm);
+  opacity: 0.6;
+}
+
+.delete-button:hover {
+  color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1);
+  opacity: 1;
+}
+
+.delete-icon {
+  font-size: 1.2rem;
+  font-weight: bold;
+}

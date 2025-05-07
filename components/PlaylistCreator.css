@@ -1,0 +1,72 @@
+/* PlaylistCreator.css */
+.playlist-creator {
+  background-color: rgba(20, 20, 20, 0.7);
+  border-radius: 12px;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  border-left: 4px solid #3498db;
+}
+
+.creator-title {
+  color: #ffffff;
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-md);
+  font-weight: 600;
+}
+
+.creator-form {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.playlist-name-input {
+  flex: 1;
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-md);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background-color: #262626;
+  color: var(--text);
+  min-width: 0;
+}
+
+.playlist-name-input:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+}
+
+.create-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.create-button:hover:not(:disabled) {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+.create-button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .creator-form {
+    flex-direction: column;
+  }
+  
+  .create-button {
+    width: 100%;
+  }
+}

@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../src/contexts/UserContext";
 import { useTheme } from "../src/contexts/ThemeContext";
-import PlaylistDropdown from "./PlaylistDropdown";
-import "./MovieCard.css";
+import { useUser } from "../src/contexts/UserContext";
+import './PlaylistMovieItem.css';
 
-const MovieCard = ({ movie, showAddToPlaylist = true, onAddToPlaylist }) => {
+const PlaylistMovieItem = ({ movie, onRemove }) => {
   const navigate = useNavigate();
-  const { currentUser, addToDefaultPlaylist } = useUser();
   const { themeColors } = useTheme();
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
+  const { currentUser, addToDefaultPlaylist } = useUser();
   const [isHovered, setIsHovered] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
   // Format the poster URL or use a fallback image
   const posterUrl = movie.poster_path 
@@ -31,27 +29,21 @@ const MovieCard = ({ movie, showAddToPlaylist = true, onAddToPlaylist }) => {
   }, [currentUser, movie.id]);
 
   const handleCardClick = () => {
-    // Navigate to movie detail page instead of showing modal
+    // Navigate to movie detail page
     navigate(`/movie/${movie.id}`);
   };
 
-  const handleAddToPlaylistClick = (e) => {
+  const handleRemoveClick = (e) => {
     e.stopPropagation(); // Prevent triggering navigation
+    setIsRemoving(true);
     
-    if (!currentUser) {
-      // If no user is logged in, use the provided onAddToPlaylist function
-      if (onAddToPlaylist) {
-        setIsAdding(true);
-        // Show checkmark for 1.5 seconds
-        setTimeout(() => {
-          setIsAdding(false);
-        }, 1500);
-        onAddToPlaylist(movie);
+    // Visual feedback before removal
+    setTimeout(() => {
+      if (onRemove) {
+        onRemove();
       }
-    } else {
-      // For logged in users, show the playlist dropdown
-      setShowDropdown(prev => !prev);
-    }
+      setIsRemoving(false);
+    }, 300);
   };
 
   const handleLikeClick = (e) => {
@@ -69,16 +61,6 @@ const MovieCard = ({ movie, showAddToPlaylist = true, onAddToPlaylist }) => {
     
     // Add to or remove from default "Liked" playlist
     addToDefaultPlaylist(movie, 'Liked', newLikedState);
-  };
-
-  const handlePlaylistSelected = (playlistId) => {
-    setShowDropdown(false);
-    setIsAdding(true);
-    // Show checkmark for 1.5 seconds
-    setTimeout(() => {
-      setIsAdding(false);
-    }, 1500);
-    console.log(`Movie ${movie.title} added to playlist with ID: ${playlistId}`);
   };
 
   // Create a truncated overview if it's too long
@@ -117,27 +99,25 @@ const MovieCard = ({ movie, showAddToPlaylist = true, onAddToPlaylist }) => {
           </div>
         )}
         
-        {showAddToPlaylist && (
-          <div className="poster-actions">
-            <button 
-              className={`like-btn ${isLiked ? 'active' : ''}`}
-              onClick={handleLikeClick}
-              aria-label={isLiked ? "Remove from liked" : "Add to liked"}
-              title="Like"
-            >
-              <span className="heart-icon">{isLiked ? '♥' : '♡'}</span>
-            </button>
-            
-            <button 
-              className={`add-btn ${isAdding ? 'active' : ''}`}
-              onClick={handleAddToPlaylistClick}
-              aria-label="Add to playlist"
-              title="Add to playlist"
-            >
-              {isAdding ? '✓' : '+'}
-            </button>
-          </div>
-        )}
+        <div className="poster-actions">
+          <button 
+            className={`like-btn ${isLiked ? 'active' : ''}`}
+            onClick={handleLikeClick}
+            aria-label={isLiked ? "Remove from liked" : "Add to liked"}
+            title="Like"
+          >
+            <span className="heart-icon">{isLiked ? '♥' : '♡'}</span>
+          </button>
+
+          <button 
+            className={`remove-btn ${isRemoving ? 'active' : ''}`}
+            onClick={handleRemoveClick}
+            aria-label="Remove from playlist"
+            title="Remove from playlist"
+          >
+            <span className="remove-icon">✕</span>
+          </button>
+        </div>
       </div>
       <div className={`overlay ${isHovered ? 'show-overlay' : ''}`}>
         <div className="movie-info">
@@ -146,21 +126,8 @@ const MovieCard = ({ movie, showAddToPlaylist = true, onAddToPlaylist }) => {
           <p className="overview">{truncatedOverview}</p>
         </div>
       </div>
-      
-      {showDropdown && currentUser && (
-        <div 
-          className={`playlist-dropdown-container ${showDropdown ? 'visible' : ''}`} 
-          onClick={e => e.stopPropagation()}
-        >
-          <PlaylistDropdown 
-            movie={movie} 
-            onPlaylistSelected={handlePlaylistSelected} 
-            onClose={() => setShowDropdown(false)}
-          />
-        </div>
-      )}
     </div>
   );
 };
 
-export default MovieCard;
+export default PlaylistMovieItem;

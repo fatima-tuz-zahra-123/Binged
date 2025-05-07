@@ -1,459 +1,273 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { searchMovies } from '../services/tmdbService';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUser } from '../src/contexts/UserContext';
 import { useTheme } from '../src/contexts/ThemeContext';
+import PlaylistCreator from '../components/PlaylistCreator';
+import PlaylistsList from '../components/PlaylistsList';
+import PlaylistDetail from '../components/PlaylistDetail';
+import AuthPrompt from '../components/AuthPrompt';
 import './Playlists.css';
 
-const Playlists = () => {
+// Use React.memo to prevent unnecessary re-renders of the entire component
+const Playlists = React.memo(() => {
   const { currentUser, updateProfile } = useUser();
   const { themeColors } = useTheme();
+  const navigate = useNavigate();
   
-  // Initialize playlists from user profile if logged in, otherwise from localStorage
-  const [playlists, setPlaylists] = useState(() => {
-    if (currentUser && currentUser.playlists) {
-      return currentUser.playlists;
-    }
-    const savedPlaylists = localStorage.getItem('playlists');
-    return savedPlaylists ? JSON.parse(savedPlaylists) : [];
-  });
-  
-  const [newPlaylist, setNewPlaylist] = useState('');
-  const [activePlaylistIndex, setActivePlaylistIndex] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // State for playlists management
+  const [playlists, setPlaylists] = useState([]);
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Save playlists to user profile and localStorage whenever they change
+  
+  // Stabilize component render cycles with a render counter
+  const renderCount = React.useRef(0);
+  
+  // Calculate themed styles using themeColors
+  const themedStyles = useMemo(() => ({
+    emptyState: {
+      backgroundColor: `${themeColors.surface}CC`,
+      borderLeft: `4px solid ${themeColors.primary}`
+    },
+    errorMessage: {
+      backgroundColor: `${themeColors.error}33`,
+      borderLeft: `4px solid ${themeColors.error}`
+    },
+    loadingSpinner: {
+      borderColor: `${themeColors.primary}33`,
+      borderLeftColor: themeColors.primary
+    },
+    emptyPlaylistSelection: {
+      backgroundColor: `${themeColors.surface}99`,
+      border: `1px solid ${themeColors.primary}33`
+    }
+  }), [themeColors]);
+  
+  // Load playlists on component mount only once
   useEffect(() => {
-    // Save to localStorage as a fallback for non-logged in users
-    localStorage.setItem('playlists', JSON.stringify(playlists));
+    const timer = setTimeout(() => {
+      loadPlaylists();
+    }, 100); // Short delay to let the component fully mount first
     
-    // If user is logged in, update their profile with the playlists
-    if (currentUser) {
-      updateProfile({ playlists });
-    }
-  }, [playlists, currentUser, updateProfile]);
-
-  const handleCreatePlaylist = () => {
-    if (newPlaylist.trim()) {
-      setPlaylists([...playlists, { 
-        id: Date.now().toString(),  // Add unique ID
-        name: newPlaylist, 
-        movies: [],
-        createdAt: new Date().toISOString()
-      }]);
-      setNewPlaylist('');
-    }
-  };
-
-  const handleDeletePlaylist = (index) => {
-    const updatedPlaylists = [...playlists];
-    updatedPlaylists.splice(index, 1);
-    setPlaylists(updatedPlaylists);
-  };
-
-  const handleSearchMovies = async (playlistIndex) => {
-    if (searchQuery.trim()) {
-      setIsLoading(true);
-      setError(null);
-      
+    return () => clearTimeout(timer);
+  }, []); // Empty deps array ensures it only runs once
+  
+  // Memoize the savePlaylist function to prevent unnecessary rerenders
+  const savePlaylistsToStorage = useCallback((playlistsToSave) => {
+    // Debounce the save operation to prevent rapid successive updates
+    const handler = setTimeout(() => {
       try {
-        // Use the TMDB service to search for movies
-        const results = await searchMovies(searchQuery);
+        // Always save playlists, even if empty array
+        localStorage.setItem('playlists', JSON.stringify(playlistsToSave));
         
-        // Map the results to the format we need
-        const formattedResults = results.map(movie => ({
-          id: movie.id,
-          title: movie.title,
-          year: movie.release_date ? new Date(movie.release_date).getFullYear() : 'Unknown',
-          poster: movie.poster_path 
-            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-            : 'https://via.placeholder.com/500x750?text=No+Poster',
-          overview: movie.overview,
-          voteAverage: movie.vote_average
-        }));
-        
-        setSearchResults(formattedResults);
-        setActivePlaylistIndex(playlistIndex);
+        // If user is logged in, update their profile with the playlists
+        if (currentUser) {
+          updateProfile({ ...currentUser, playlists: playlistsToSave });
+        }
       } catch (err) {
-        console.error('Error searching movies:', err);
-        setError('Failed to fetch movies. Please try again.');
-        setSearchResults([]);
+        console.error("Error saving playlists:", err);
+        setError("Failed to save your playlists. Please try again.");
+      }
+    }, 300); // Debounce delay
+    
+    return () => clearTimeout(handler);
+  }, [currentUser, updateProfile]);
+  
+  // Save playlists when they change
+  useEffect(() => {
+    // Don't save during initial loading or when no real change has happened
+    if (!isLoading && renderCount.current > 1) {
+      const cleanup = savePlaylistsToStorage(playlists);
+      return () => cleanup();
+    }
+    renderCount.current += 1;
+  }, [playlists, isLoading, savePlaylistsToStorage]);
+  
+  // Load playlists from user profile if logged in, otherwise from localStorage
+  const loadPlaylists = useCallback(() => {
+    setIsLoading(true);
+    setError(null);
+    
+    setTimeout(() => {
+      try {
+        let loadedPlaylists = [];
+        
+        if (currentUser && currentUser.playlists) {
+          loadedPlaylists = currentUser.playlists;
+        } else {
+          const savedPlaylists = localStorage.getItem('playlists');
+          if (savedPlaylists) {
+            loadedPlaylists = JSON.parse(savedPlaylists);
+          }
+        }
+        
+        setPlaylists(loadedPlaylists);
+      } catch (err) {
+        console.error("Error loading playlists:", err);
+        setError("Failed to load your playlists. Please refresh the page.");
       } finally {
         setIsLoading(false);
       }
-    }
-  };
-
-  const addMovieToPlaylist = (playlistIndex, movie) => {
-    const updatedPlaylists = [...playlists];
-    // Check if movie is already in the playlist to avoid duplicates
-    if (!updatedPlaylists[playlistIndex].movies.some(m => m.id === movie.id)) {
-      updatedPlaylists[playlistIndex].movies.push({
-        ...movie,
-        addedAt: new Date().toISOString()
+    }, 100); // Short delay to ensure smooth rendering
+  }, [currentUser]);
+  
+  // Create a new playlist with error handling
+  const handleCreatePlaylist = useCallback((playlistName) => {
+    try {
+      // Validate input
+      if (!playlistName || playlistName.trim() === '') {
+        setError("Playlist name cannot be empty.");
+        return;
+      }
+      
+      const newPlaylist = {
+        id: `playlist_${Date.now()}`,
+        name: playlistName.trim(),
+        createdAt: new Date().toISOString(),
+        movies: []
+      };
+      
+      setPlaylists(currentPlaylists => {
+        const updatedPlaylists = [...currentPlaylists, newPlaylist];
+        return updatedPlaylists;
       });
-      setPlaylists(updatedPlaylists);
+      
+      // Auto-select the newly created playlist after a short delay
+      setTimeout(() => {
+        setSelectedPlaylistId(newPlaylist.id);
+      }, 100);
+      
+    } catch (err) {
+      console.error("Error creating playlist:", err);
+      setError("Failed to create playlist. Please try again.");
     }
-  };
+  }, []);
+  
+  // Delete a playlist with optimized handler
+  const handleDeletePlaylist = useCallback((playlistId) => {
+    try {
+      setPlaylists(currentPlaylists => {
+        // Find the playlist to delete within the callback to avoid stale state
+        const playlistToDelete = currentPlaylists.find(p => p.id === playlistId);
+        if (!playlistToDelete) {
+          console.error("Attempted to delete non-existent playlist");
+          return currentPlaylists;
+        }
+        
+        // Update selectedPlaylistId if needed
+        if (selectedPlaylistId === playlistId) {
+          // Need to use setTimeout to break the state update cycle
+          setTimeout(() => {
+            setSelectedPlaylistId(null);
+          }, 0);
+        }
+        
+        // Return filtered playlists
+        return currentPlaylists.filter(playlist => playlist.id !== playlistId);
+      });
+    } catch (err) {
+      console.error("Error deleting playlist:", err);
+      setError("Failed to delete playlist. Please try again.");
+    }
+  }, [selectedPlaylistId]); // Only depend on selectedPlaylistId
+  
+  // Update a playlist with functional state updates
+  const handleUpdatePlaylist = useCallback((updatedPlaylist) => {
+    try {
+      setPlaylists(currentPlaylists => 
+        currentPlaylists.map(playlist => 
+          playlist.id === updatedPlaylist.id ? updatedPlaylist : playlist
+        )
+      );
+    } catch (err) {
+      console.error("Error updating playlist:", err);
+      setError("Failed to update playlist. Please try again.");
+    }
+  }, []);
+  
+  // Select a playlist to view/edit
+  const handleSelectPlaylist = useCallback((playlistId) => {
+    setSelectedPlaylistId(playlistId);
+  }, []);
+  
+  // Get the selected playlist - memoized to prevent unnecessary calculations
+  const selectedPlaylist = useMemo(() => {
+    return playlists.find(playlist => playlist.id === selectedPlaylistId);
+  }, [playlists, selectedPlaylistId]);
 
-  const removeMovieFromPlaylist = (playlistIndex, movieId) => {
-    const updatedPlaylists = [...playlists];
-    updatedPlaylists[playlistIndex].movies = updatedPlaylists[playlistIndex].movies.filter(
-      movie => movie.id !== movieId
-    );
-    setPlaylists(updatedPlaylists);
+  // Clear any error messages
+  const dismissError = () => {
+    setError(null);
   };
-
-  // Apply theme-based styling
-  const pageStyle = {
-    backgroundColor: themeColors.background,
-    color: themeColors.text,
-    minHeight: "calc(100vh - 70px)"
-  };
-
-  const createContainerStyle = {
-    display: "flex",
-    gap: "1rem",
-    marginBottom: "2rem",
-    backgroundColor: `${themeColors.surface}DD`,
-    padding: "1.5rem",
-    borderRadius: "12px",
-    boxShadow: themeColors.shadow,
-    borderLeft: `4px solid ${themeColors.primary}`
-  };
-
-  const inputStyle = {
-    flex: 1,
-    padding: "0.75rem",
-    borderRadius: "8px",
-    border: `1px solid ${themeColors.border}`,
-    backgroundColor: `${themeColors.background}60`,
-    color: themeColors.text
-  };
-
-  const buttonStyle = {
-    backgroundColor: themeColors.primary,
-    color: themeColors.surface,
-    border: "none",
-    borderRadius: "8px",
-    padding: "0.5rem 1rem",
-    cursor: "pointer",
-    fontWeight: "600"
-  };
-
-  const cardStyle = {
-    backgroundColor: themeColors.surface,
-    borderRadius: "12px",
-    boxShadow: themeColors.shadow,
-    overflow: "hidden",
-    borderTop: `3px solid ${themeColors.primary}`
-  };
-
-  const headerStyle = {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "1rem",
-    backgroundColor: `${themeColors.background}80`,
-    borderBottom: `1px solid ${themeColors.border}`
-  };
-
-  const emptyStateStyle = {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "2rem",
-    textAlign: "center",
-    color: themeColors.textSecondary,
-    backgroundColor: `${themeColors.surface}DD`,
-    borderRadius: "12px",
-    borderLeft: `4px solid ${themeColors.primary}`
-  };
-
-  const authPromptStyle = {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "2rem",
-    textAlign: "center",
-    backgroundColor: `${themeColors.surface}DD`,
-    borderRadius: "12px",
-    margin: "100px auto",
-    maxWidth: "500px",
-    borderTop: `3px solid ${themeColors.primary}`,
-    boxShadow: themeColors.shadow
-  };
-
+  
+  // If user is not logged in, show auth prompt with proper navigation
   if (!currentUser) {
-    return (
-      <div className="page playlists-page" style={pageStyle}>
-        <div style={authPromptStyle}>
-          <h2 style={{ color: themeColors.primary, marginBottom: "1rem" }}>Your Movie Playlists</h2>
-          <p style={{ marginBottom: "1.5rem", color: themeColors.textSecondary }}>Sign in to create and manage your movie playlists!</p>
-          <div style={{ display: "flex", gap: "1rem" }}>
-            <Link to="/login" style={{ ...buttonStyle, textDecoration: "none" }}>Login</Link>
-            <Link to="/signup" style={{ 
-              backgroundColor: "transparent", 
-              border: `1px solid ${themeColors.primary}`,
-              color: themeColors.primary,
-              textDecoration: "none",
-              borderRadius: "8px",
-              padding: "0.5rem 1rem"
-            }}>Sign Up</Link>
-          </div>
-        </div>
-      </div>
-    );
+    return <AuthPrompt onLogin={() => navigate('/login')} />;
   }
-
+  
   return (
-    <div className="page playlists-page" style={pageStyle}>
-      <h2 style={{ color: themeColors.primary, marginBottom: "1.5rem" }}>Your Movie Playlists</h2>
+    <div className="page playlists-page" style={{ backgroundColor: themeColors.background }}>
+      <h1 className="section-heading" style={{ color: themeColors.text }}>
+        Your Movie Playlists
+      </h1>
       
-      {/* Create playlist section */}
-      <div style={createContainerStyle}>
-        <input
-          type="text"
-          value={newPlaylist}
-          onChange={(e) => setNewPlaylist(e.target.value)}
-          placeholder="New Playlist Name"
-          style={inputStyle}
-        />
-        <button style={buttonStyle} onClick={handleCreatePlaylist}>
-          Create Playlist
-        </button>
-      </div>
+      {/* Error message display with themed styles */}
+      {error && (
+        <div className="error-message" onClick={dismissError} style={themedStyles.errorMessage}>
+          {error} <span className="dismiss-error">(Click to dismiss)</span>
+        </div>
+      )}
       
-      {/* Playlists display section */}
-      <div className="playlist-grid">
-        {playlists.length === 0 ? (
-          <div style={emptyStateStyle}>
-            <p>No playlists yet. Create one to get started!</p>
-          </div>
-        ) : (
-          playlists.map((playlist, index) => (
-            <div key={playlist.id || index} style={cardStyle}>
-              <div style={headerStyle}>
-                <h3 style={{ margin: 0, color: themeColors.text }}>{playlist.name}</h3>
-                <span style={{ 
-                  fontSize: "0.9rem",
-                  color: themeColors.textSecondary,
-                  backgroundColor: `${themeColors.primary}30`,
-                  padding: "3px 8px",
-                  borderRadius: "12px"
-                }}>
-                  {playlist.movies.length} {playlist.movies.length === 1 ? 'movie' : 'movies'}
-                </span>
-                <button 
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: themeColors.textSecondary,
-                    fontSize: "1.5rem",
-                    cursor: "pointer"
-                  }}
-                  onClick={() => handleDeletePlaylist(index)}
-                  aria-label={`Delete ${playlist.name} playlist`}
-                >
-                  <span aria-hidden="true">×</span>
-                </button>
+      {/* Loading state with themed spinner */}
+      {isLoading ? (
+        <div className="loading-container">
+          <div className="loading-spinner" style={themedStyles.loadingSpinner}></div>
+          <p style={{ color: themeColors.text }}>Loading your playlists...</p>
+        </div>
+      ) : (
+        <>
+          {/* Create new playlist section */}
+          <PlaylistCreator onCreatePlaylist={handleCreatePlaylist} />
+          
+          {/* Empty state when no playlists exist */}
+          {playlists.length === 0 ? (
+            <div className="empty-state" style={themedStyles.emptyState}>
+              <h3 style={{ color: themeColors.text }}>You don't have any playlists yet</h3>
+              <p style={{ color: themeColors.textSecondary }}>Create your first playlist above to get started!</p>
+            </div>
+          ) : (
+            /* Main content area with playlist list and details */
+            <div className="playlists-container">
+              {/* Sidebar with playlists list */}
+              <div className="playlists-sidebar">
+                <PlaylistsList 
+                  playlists={playlists} 
+                  selectedPlaylistId={selectedPlaylistId}
+                  onSelectPlaylist={handleSelectPlaylist}
+                  onDeletePlaylist={handleDeletePlaylist}
+                />
               </div>
               
-              {/* Add movies to this specific playlist */}
-              <div style={{ padding: "1rem", borderBottom: `1px solid ${themeColors.border}` }}>
-                <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
-                  <input
-                    type="text"
-                    value={activePlaylistIndex === index ? searchQuery : ''}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search for movies to add..."
-                    style={{
-                      flex: 1,
-                      padding: "0.5rem",
-                      borderRadius: "8px",
-                      border: `1px solid ${themeColors.border}`,
-                      backgroundColor: `${themeColors.background}60`,
-                      color: themeColors.text
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleSearchMovies(index);
-                    }}
+              {/* Main content area - selected playlist details */}
+              <div className="playlist-detail-container">
+                {selectedPlaylist ? (
+                  <PlaylistDetail
+                    playlist={selectedPlaylist}
+                    onUpdatePlaylist={handleUpdatePlaylist}
                   />
-                  <button 
-                    style={buttonStyle}
-                    onClick={() => handleSearchMovies(index)}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Searching...' : 'Search'}
-                  </button>
-                </div>
-                
-                {error && activePlaylistIndex === index && (
-                  <div style={{ 
-                    color: themeColors.primary,
-                    padding: "0.5rem",
-                    marginBottom: "1rem",
-                    backgroundColor: `${themeColors.primary}15`,
-                    borderRadius: "8px"
-                  }}>{error}</div>
-                )}
-                
-                {activePlaylistIndex === index && searchResults.length > 0 && (
-                  <div style={{ marginTop: "1rem" }}>
-                    <h4 style={{ marginBottom: "0.5rem", color: themeColors.text }}>Search Results</h4>
-                    <div className="movie-grid">
-                      {searchResults.map((movie) => (
-                        <div key={movie.id} style={{ 
-                          position: "relative",
-                          overflow: "hidden",
-                          borderRadius: "12px",
-                          backgroundColor: themeColors.surface,
-                          boxShadow: themeColors.shadow,
-                          border: `1px solid ${themeColors.border}`
-                        }}>
-                          <div className="poster-container">
-                            <img 
-                              src={movie.poster} 
-                              alt={movie.title} 
-                              className="movie-poster"
-                              loading="lazy"
-                            />
-                            <div style={{
-                              position: "absolute",
-                              top: "10px",
-                              right: "10px",
-                              backgroundColor: "rgba(0, 0, 0, 0.7)",
-                              color: themeColors.primary,
-                              borderRadius: "8px",
-                              padding: "4px 8px",
-                              fontSize: "0.9rem",
-                              fontWeight: "600"
-                            }}>
-                              <span>{movie.voteAverage?.toFixed(1) || 'N/A'}</span>
-                            </div>
-                          </div>
-                          <div style={{ padding: "0.5rem", backgroundColor: `${themeColors.background}95` }}>
-                            <h4 style={{
-                              margin: "0 0 5px 0",
-                              fontSize: "0.95rem",
-                              color: themeColors.text,
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis"
-                            }}>{movie.title}</h4>
-                            <p style={{
-                              fontSize: "0.9rem",
-                              color: themeColors.textSecondary,
-                              marginBottom: "10px"
-                            }}>{movie.year !== 'Unknown' ? movie.year : ''}</p>
-                            <button 
-                              style={{
-                                ...buttonStyle,
-                                width: "100%",
-                                opacity: playlist.movies.some(m => m.id === movie.id) ? 0.7 : 1
-                              }}
-                              onClick={() => addMovieToPlaylist(index, movie)}
-                              disabled={playlist.movies.some(m => m.id === movie.id)}
-                            >
-                              {playlist.movies.some(m => m.id === movie.id) 
-                                ? 'In Playlist' 
-                                : 'Add to Playlist'}
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {activePlaylistIndex === index && searchResults.length === 0 && !isLoading && searchQuery.trim() && !error && (
-                  <div style={{ padding: "1rem", textAlign: "center", color: themeColors.textSecondary }}>No movies found for "{searchQuery}"</div>
-                )}
-              </div>
-              
-              {/* Movies in playlist */}
-              <div style={{ padding: "1rem" }}>
-                <h4 style={{ marginBottom: "1rem", color: themeColors.text }}>Movies in this Playlist</h4>
-                {playlist.movies.length > 0 ? (
-                  <div className="movie-grid">
-                    {playlist.movies.map((movie) => (
-                      <div key={movie.id} style={{ 
-                        position: "relative",
-                        overflow: "hidden",
-                        borderRadius: "12px",
-                        backgroundColor: themeColors.surface,
-                        boxShadow: themeColors.shadow,
-                        border: `1px solid ${themeColors.border}`
-                      }}>
-                        <div className="poster-container">
-                          <img 
-                            src={movie.poster} 
-                            alt={movie.title} 
-                            className="movie-poster"
-                            loading="lazy"
-                          />
-                          <div style={{
-                            position: "absolute",
-                            top: "10px",
-                            right: "10px",
-                            backgroundColor: "rgba(0, 0, 0, 0.7)",
-                            color: themeColors.primary,
-                            borderRadius: "8px",
-                            padding: "4px 8px",
-                            fontSize: "0.9rem",
-                            fontWeight: "600"
-                          }}>
-                            <span>{movie.voteAverage?.toFixed(1) || 'N/A'}</span>
-                          </div>
-                        </div>
-                        <div style={{ padding: "0.5rem", backgroundColor: `${themeColors.background}95` }}>
-                          <h4 style={{
-                            margin: "0 0 5px 0",
-                            fontSize: "0.95rem",
-                            color: themeColors.text,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis"
-                          }}>{movie.title}</h4>
-                          <p style={{
-                            fontSize: "0.9rem",
-                            color: themeColors.textSecondary,
-                            marginBottom: "10px"
-                          }}>{movie.year !== 'Unknown' ? movie.year : ''}</p>
-                          <button 
-                            style={{
-                              backgroundColor: `${themeColors.background}60`,
-                              color: themeColors.primary,
-                              border: `1px solid ${themeColors.primary}`,
-                              borderRadius: "8px",
-                              padding: "0.5rem 1rem",
-                              cursor: "pointer",
-                              fontWeight: "600",
-                              width: "100%"
-                            }}
-                            onClick={() => removeMovieFromPlaylist(index, movie.id)}
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 ) : (
-                  <p style={{ padding: "1rem", textAlign: "center", color: themeColors.textSecondary }}>No movies in this playlist yet.</p>
+                  <div className="empty-playlist-selection" style={themedStyles.emptyPlaylistSelection}>
+                    <h3 style={{ color: themeColors.text }}>Select a playlist to view and edit</h3>
+                    <p style={{ color: themeColors.textSecondary }}>Choose a playlist from the sidebar or create a new one</p>
+                  </div>
                 )}
               </div>
             </div>
-          ))
-        )}
-      </div>
+          )}
+        </>
+      )}
     </div>
   );
-};
+});
 
 export default Playlists;

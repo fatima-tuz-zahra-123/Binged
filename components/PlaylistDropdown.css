@@ -1,11 +1,12 @@
 .playlist-dropdown {
   padding: var(--spacing-md);
-  background-color: var(--surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  background-color: rgba(20, 20, 20, 0.95);
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
   color: var(--text);
   width: 100%;
   max-width: 100%;
+  border-top: 1px solid rgba(52, 152, 219, 0.3);
 }
 
 .dropdown-header {
@@ -13,33 +14,36 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-sm);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: var(--spacing-sm);
 }
 
 .dropdown-header h4 {
   margin: 0;
   color: var(--primary);
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .close-btn {
   background: transparent;
   border: none;
-  color: var(--textSecondary);
-  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.1rem;
   cursor: pointer;
   padding: 4px 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: all var(--transition);
+  transition: all 0.2s ease;
+  width: 28px;
+  height: 28px;
 }
 
 .close-btn:hover {
-  background-color: rgba(166, 207, 213, 0.1);
-  color: var(--primary);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
 .select-container {
@@ -48,60 +52,83 @@
 
 .playlist-select {
   width: 100%;
-  padding: var(--spacing-sm);
-  border: 1px solid var(--border);
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius);
-  background-color: rgba(166, 207, 213, 0.1);
-  color: var(--text);
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #fff;
   font-size: 0.9rem;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A6CFD5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.7rem center;
   background-size: 0.8rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.playlist-select:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
 .dropdown-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: var(--spacing-sm);
-  margin-top: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  align-items: center;
 }
 
 .add-btn, .create-btn {
   background-color: var(--primary);
-  color: var(--surface);
+  color: white;
   border: none;
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: 8px 14px;
   border-radius: var(--radius);
   cursor: pointer;
   font-size: 0.85rem;
-  transition: background-color var(--transition);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .add-btn:hover, .create-btn:hover {
-  background-color: var(--secondary);
+  background-color: #2980b9;
+  transform: translateY(-1px);
 }
 
 .add-btn:disabled {
-  background-color: #666;
+  background-color: rgba(52, 152, 219, 0.3);
   cursor: not-allowed;
+  transform: none;
 }
 
 .new-btn, .cancel-btn {
-  background-color: transparent;
-  color: var(--textSecondary);
-  border: 1px solid var(--border);
-  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 8px 14px;
   border-radius: var(--radius);
   cursor: pointer;
   font-size: 0.85rem;
-  transition: all var(--transition);
+  transition: all 0.2s ease;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .new-btn:hover, .cancel-btn:hover {
-  background-color: rgba(166, 207, 213, 0.1);
-  color: var(--text);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+}
+
+.new-btn {
+  flex: 1;
 }
 
 .create-new-form {
@@ -110,13 +137,20 @@
 
 .new-playlist-input {
   width: 100%;
-  padding: var(--spacing-sm);
-  border: 1px solid var(--border);
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius);
-  background-color: rgba(166, 207, 213, 0.1);
-  color: var(--text);
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #fff;
   font-size: 0.9rem;
   margin-bottom: var(--spacing-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.new-playlist-input:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
 .message {
@@ -125,19 +159,38 @@
   border-radius: var(--radius);
   font-size: 0.85rem;
   text-align: center;
+  font-weight: 500;
 }
 
 .message.error {
-  background-color: rgba(255, 0, 0, 0.1);
-  color: #ff3b3b;
+  background-color: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
 }
 
 .message.success {
-  background-color: rgba(39, 174, 96, 0.1);
+  background-color: rgba(46, 204, 113, 0.2);
   color: #2ecc71;
 }
 
 .message.info {
-  background-color: rgba(52, 152, 219, 0.1);
+  background-color: rgba(52, 152, 219, 0.2);
   color: #3498db;
+}
+
+.confirm-btn {
+  width: 38px !important;
+  height: 38px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: normal;
+  flex: 0 0 auto !important;
+  min-width: unset !important;
+}
+
+.arrow-icon {
+  font-size: 22px;
+  line-height: 1;
 }

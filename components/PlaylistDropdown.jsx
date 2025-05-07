@@ -242,12 +242,13 @@ const PlaylistDropdown = ({ movie, onPlaylistSelected, onClose }) => {
               New Playlist
             </button>
             <button 
-              className="add-btn"
+              className="add-btn confirm-btn"
               onClick={handleAdd}
               disabled={!selected}
               style={selected ? primaryBtnStyle : { ...primaryBtnStyle, opacity: 0.5 }}
+              title="Add to Playlist"
             >
-              Add to Playlist
+              <span className="arrow-icon">›</span>
             </button>
           </div>
         </>

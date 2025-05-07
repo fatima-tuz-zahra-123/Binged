@@ -248,6 +248,68 @@ export const UserProvider = ({ children }) => {
     return { success: true, user: updatedUser };
   };
 
+  // Add to or remove from default playlists (like "Liked" playlist)
+  const addToDefaultPlaylist = (movie, playlistName, add = true) => {
+    if (!currentUser) return { success: false, message: 'Not logged in' };
+    
+    // Make a copy of the current user
+    const userCopy = { ...currentUser };
+    
+    // Ensure playlists array exists
+    if (!userCopy.playlists) {
+      userCopy.playlists = [];
+    }
+    
+    // Find or create the default playlist
+    let defaultPlaylist = userCopy.playlists.find(p => p.name === playlistName);
+    
+    if (!defaultPlaylist) {
+      defaultPlaylist = {
+        id: Date.now().toString(),
+        name: playlistName,
+        description: `Your ${playlistName.toLowerCase()} movies`,
+        isSystem: true,
+        createdAt: new Date().toISOString(),
+        movies: []
+      };
+      userCopy.playlists.push(defaultPlaylist);
+    } else if (!defaultPlaylist.movies) {
+      defaultPlaylist.movies = [];
+    }
+    
+    // Add or remove the movie
+    if (add) {
+      // Check if movie already exists in the playlist
+      const movieExists = defaultPlaylist.movies.some(m => m.id === movie.id);
+      if (!movieExists) {
+        // Add the movie (with simplified movie object to reduce storage size)
+        defaultPlaylist.movies.push({
+          id: movie.id,
+          title: movie.title,
+          poster_path: movie.poster_path,
+          release_date: movie.release_date,
+          vote_average: movie.vote_average,
+          addedAt: new Date().toISOString()
+        });
+      }
+    } else {
+      // Remove the movie
+      defaultPlaylist.movies = defaultPlaylist.movies.filter(m => m.id !== movie.id);
+    }
+    
+    // Update the user in state
+    setCurrentUser(userCopy);
+    
+    // Update the user in users array
+    const updatedUsers = users.map(u => 
+      u.id === currentUser.id ? userCopy : u
+    );
+    
+    setUsers(updatedUsers);
+    
+    return { success: true };
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -262,7 +324,8 @@ export const UserProvider = ({ children }) => {
         getActiveFriends,
         getFriendRequests,
         calculateBlendCompatibility,
-        updateProfile
+        updateProfile,
+        addToDefaultPlaylist
       }}
     >
       {children}

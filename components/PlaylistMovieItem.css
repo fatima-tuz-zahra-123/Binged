@@ -1,0 +1,184 @@
+/* Import MovieCard styles */
+@import url('./MovieCard.css');
+
+.playlist-movie-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background-color: rgba(30, 30, 30, 0.8);
+  transition: all 0.3s ease;
+}
+
+.playlist-movie-item:hover {
+  background-color: rgba(40, 40, 40, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.playlist-movie-poster {
+  width: 60px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 12px;
+}
+
+.playlist-movie-info {
+  flex-grow: 1;
+}
+
+.playlist-movie-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.playlist-movie-year {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.remove-movie-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.remove-movie-btn:hover {
+  color: #ff5555;
+  background-color: rgba(255, 85, 85, 0.1);
+  transform: scale(1.1);
+}
+
+/* Override specific styles for the removal button */
+.remove-btn {
+  background-color: rgba(50, 50, 50, 0.85);
+  color: #e74c3c;
+  transition: all 0.2s ease;
+  font-size: 16px;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(231, 76, 60, 0.7);
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  padding: 0;
+  min-width: 38px;
+  flex: 0 0 38px;
+}
+
+.remove-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #e74c3c;
+  transform: scale(0);
+  transition: transform 0.3s ease;
+  border-radius: 50%;
+  z-index: -1;
+}
+
+.remove-btn.active::before {
+  transform: scale(1);
+}
+
+.remove-btn.active {
+  color: white;
+  border-color: transparent;
+}
+
+.remove-icon {
+  position: relative;
+  z-index: 2;
+  font-size: 14px;
+}
+
+/* Ensure proper hover behavior for actions */
+.movie-card .poster-actions {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.movie-card:hover .poster-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Ensure we have consistent spacing between action buttons */
+.poster-actions {
+  display: flex;
+  gap: 8px;
+  position: absolute;
+  top: var(--spacing-xs);
+  left: var(--spacing-xs);
+  z-index: 5;
+}
+
+/* Make like button also a perfect circle */
+.like-btn {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  min-width: 38px;
+  flex: 0 0 38px;
+  box-sizing: border-box;
+}
+
+.heart-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 768px) {
+  .remove-btn, 
+  .like-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px;
+    flex: 0 0 32px;
+  }
+  
+  .remove-icon {
+    font-size: 12px;
+  }
+  
+  .heart-icon {
+    font-size: 14px;
+  }
+  
+  .poster-actions {
+    top: var(--spacing-sm);
+    left: var(--spacing-sm);
+  }
+}
+
+/* Ensure proper hover behavior only on non-touch devices */
+@media (hover: hover) {
+  .movie-card .poster-actions {
+    opacity: 0;
+  }
+  
+  .movie-card:hover .poster-actions {
+    opacity: 1;
+  }
+}

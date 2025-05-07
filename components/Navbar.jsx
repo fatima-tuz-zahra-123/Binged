@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../src/contexts/ThemeContext";
 import { useUser } from "../src/contexts/UserContext";
 import "./Navbar.css";
@@ -47,11 +47,15 @@ const Navbar = () => {
     navigate('/');
   };
   
-  const handleNavigate = (e) => {
-    // Stop propagation to prevent any parent handlers from capturing the event
-    e.stopPropagation();
+  // Enhanced navigation handler that uses direct programmatic navigation
+  const handleNavigate = (e, path) => {
+    e.preventDefault(); // Prevent default link behavior
+    e.stopPropagation(); // Stop event propagation
     setMenuOpen(false);
     setUserDropdownOpen(false);
+    
+    // Direct programmatic navigation
+    navigate(path);
   };
   
   // Check if a link is active based on current location
@@ -62,16 +66,24 @@ const Navbar = () => {
   // Create a style for the navbar based on current theme
   const navbarStyle = {
     backgroundColor: themeColors.surface,
-    boxShadow: `0 3px 15px ${themeColors.theme === 'dark' ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)'}`,
+    boxShadow: `0 3px 15px ${theme === 'dark' ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)'}`,
+  };
+
+  // Theme toggle button styles
+  const themeToggleStyle = {
+    backgroundColor: `${themeColors.primary}15`,
+    borderColor: `${themeColors.primary}30`,
+    color: themeColors.primary,
+    boxShadow: theme === 'dark' ? `0 0 8px ${themeColors.primary}40` : 'none'
   };
 
   return (
     <nav className="navbar" style={navbarStyle}>
       <div className="navbar-container">
-        <Link to="/" className="logo" onClick={(e) => handleNavigate(e)}>
+        <a href="/" className="logo" onClick={(e) => handleNavigate(e, '/')}>
           <span className="logo-icon">🎬</span> 
           <span className="logo-text">Binged</span>
-        </Link>
+        </a>
         
         <div className="mobile-menu-toggle" onClick={toggleMenu}>
           <span></span>
@@ -81,11 +93,21 @@ const Navbar = () => {
         
         <div className={`nav-content ${menuOpen ? 'active' : ''}`}>
           <div className="nav-links">
-            <Link to="/" className={isActive('/')} onClick={(e) => handleNavigate(e)}>Home</Link>
-            <Link to="/discover" className={isActive('/discover')} onClick={(e) => handleNavigate(e)}>Discover</Link>
-            <Link to="/playlists" className={isActive('/playlists')} onClick={(e) => handleNavigate(e)}>Playlists</Link>
-            <Link to="/mood" className={isActive('/mood')} onClick={(e) => handleNavigate(e)}>Mood</Link>
-            <Link to="/social" className={isActive('/social')} onClick={(e) => handleNavigate(e)}>Social</Link>
+            <a href="/" className={isActive('/')} onClick={(e) => handleNavigate(e, '/')}>
+              Home
+            </a>
+            <a href="/discover" className={isActive('/discover')} onClick={(e) => handleNavigate(e, '/discover')}>
+              Discover
+            </a>
+            <a href="/playlists" className={isActive('/playlists')} onClick={(e) => handleNavigate(e, '/playlists')}>
+              Playlists
+            </a>
+            <a href="/mood" className={isActive('/mood')} onClick={(e) => handleNavigate(e, '/mood')}>
+              Mood
+            </a>
+            <a href="/social" className={isActive('/social')} onClick={(e) => handleNavigate(e, '/social')}>
+              Social
+            </a>
           </div>
           
           <div className="nav-actions">
@@ -93,11 +115,7 @@ const Navbar = () => {
               className="theme-toggle" 
               onClick={toggleTheme}
               aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-              style={{
-                backgroundColor: `${themeColors.primary}15`,
-                borderColor: `${themeColors.primary}30`,
-                color: themeColors.primary
-              }}
+              style={themeToggleStyle}
             >
               {theme === 'light' ? '🌙' : '☀️'}
             </button>
@@ -119,20 +137,20 @@ const Navbar = () => {
                       <p className="dropdown-username">{currentUser.username}</p>
                       <p className="dropdown-email">{currentUser.email}</p>
                     </div>
-                    <Link 
-                      to="/profile" 
+                    <a 
+                      href="/profile" 
                       className="dropdown-item"
-                      onClick={(e) => handleNavigate(e)}
+                      onClick={(e) => handleNavigate(e, '/profile')}
                     >
                       <i>👤</i> Profile
-                    </Link>
-                    <Link 
-                      to="/playlists" 
+                    </a>
+                    <a 
+                      href="/playlists" 
                       className="dropdown-item"
-                      onClick={(e) => handleNavigate(e)}
+                      onClick={(e) => handleNavigate(e, '/playlists')}
                     >
                       <i>📋</i> My Playlists
-                    </Link>
+                    </a>
                     <button 
                       className="dropdown-item logout-btn"
                       onClick={handleLogout}
@@ -144,8 +162,12 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="auth-links">
-                <Link to="/login" className="auth-link" onClick={(e) => handleNavigate(e)}>Login</Link>
-                <Link to="/signup" className="auth-link signup-link" onClick={(e) => handleNavigate(e)}>Sign Up</Link>
+                <a href="/login" className="auth-link" onClick={(e) => handleNavigate(e, '/login')}>
+                  Login
+                </a>
+                <a href="/signup" className="auth-link signup-link" onClick={(e) => handleNavigate(e, '/signup')}>
+                  Sign Up
+                </a>
               </div>
             )}
           </div>

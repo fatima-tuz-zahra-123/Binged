@@ -13,7 +13,7 @@ const Footer = () => {
   
   return (
     <footer className="footer" style={footerStyle}>
-      <p>˗ˏˋ binged by asma, fatima & zain ´ˎ˗</p>
+      <p> &copy; binged 2025 by asma, fatima & zain  ˖ *°࿐</p>
     </footer>
   );
 };

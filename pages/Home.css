@@ -1,20 +1,135 @@
 /* pages/Home.css */
 
 .home-page {
-    padding: 2rem;
-    background-color: #0F084B;
-    min-height: 100vh;
-    color: #C2E7D9;
-  }
-  
-  h2 {
-    color: #A6CFD5;
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
-  }
-  
+  padding: 2rem;
+  background-color: #0F084B;
+  min-height: 100vh;
+  color: #C2E7D9;
+}
+
+.section-title {
+  color: #A6CFD5;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background-color: #3498db;
+}
+
+.movie-section {
+  margin-bottom: 3rem;
+}
+
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.8rem;
+}
+
+/* Added styles for proper grid layout with larger posters */
+@media (min-width: 768px) {
   .movie-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   }
+}
+
+@media (min-width: 1200px) {
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}
+
+/* Hero section styles */
+.hero-section {
+  margin-bottom: 3rem;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-content {
+  padding: 2rem;
+  background: linear-gradient(to right, rgba(15, 8, 75, 0.9) 30%, rgba(15, 8, 75, 0.7) 60%, rgba(15, 8, 75, 0.5) 80%, transparent);
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero-title {
+  font-size: 3rem;
+  margin: 0 0 1rem 0;
+  max-width: 70%;
+}
+
+.hero-description {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  max-width: 60%;
+  line-height: 1.5;
+}
+
+.hero-cta {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  align-self: flex-start;
+}
+
+.hero-cta:hover {
+  transform: translateY(-3px);
+  background-color: #2980b9;
+}
+
+.hero-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
+
+/* Movie card enhancements */
+.movie-card-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+@media (max-width: 767px) {
+  .hero-content {
+    min-height: 300px;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+    max-width: 100%;
+  }
+  
+  .hero-description {
+    max-width: 100%;
+    font-size: 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+}
