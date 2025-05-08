@@ -1,19 +1,26 @@
 /* pages/Home.css */
 
 .home-page {
-  padding: 2rem;
+  padding: 0 0 3rem 0;
   background-color: #0F084B;
   min-height: 100vh;
   color: #C2E7D9;
 }
 
-/* Hero Slider Styles */
+.content-container {
+  padding: 2rem;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+/* Hero Slider Styles with improved visuals */
 .hero-slider {
   position: relative;
   width: 100%;
-  height: 500px;
+  height: 600px;
   overflow: hidden;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
 }
 
 .hero-slides {
@@ -29,7 +36,7 @@
   width: 100%;
   height: 100%;
   opacity: 0;
-  transition: opacity 1s ease;
+  transition: opacity 1.2s ease;
   cursor: pointer;
 }
 
@@ -47,7 +54,7 @@
   background-size: cover;
   background-position: center;
   z-index: -1;
-  filter: brightness(0.3);
+  filter: brightness(0.25);
   transform: scale(1.05);
   transition: transform 10s ease;
 }
@@ -62,82 +69,123 @@
   justify-content: center;
   align-items: flex-start;
   height: 100%;
-  padding: 0 5%;
+  padding: 0 8%;
   position: relative;
   z-index: 2;
-  max-width: 800px;
+  max-width: 1000px;
 }
 
 .hero-info {
-  background-color: rgba(0, 0, 0, 0.7);
-  padding: 1.5rem;
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
-  max-width: 550px;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 2rem;
+  border-radius: 12px;
+  backdrop-filter: blur(15px);
+  max-width: 650px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .hero-title {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  font-size: 3rem;
+  margin-bottom: 1.2rem;
   color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  line-height: 1.2;
 }
 
 .hero-description {
-  font-size: 1rem;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1.8rem;
   color: #e0e0e0;
 }
 
 .hero-metadata {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 15px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.8rem;
 }
 
 .hero-metadata .rating {
-  background-color: rgba(255, 255, 255, 0.15);
-  padding: 5px 10px;
+  background-color: rgba(255, 215, 0, 0.2);
+  padding: 6px 12px;
   border-radius: 20px;
   font-weight: 600;
   color: #f8c100;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .hero-metadata .year {
   color: #bbb;
   font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.hero-metadata .genre {
+  background-color: rgba(52, 152, 219, 0.2);
+  padding: 6px 12px;
+  border-radius: 20px;
+  color: #64b5f6;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .hero-cta {
-  padding: 10px 20px;
+  padding: 12px 24px;
   border: none;
   border-radius: 30px;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hero-secondary-cta {
+  padding: 12px 24px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.hero-cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+.hero-cta:hover, .hero-secondary-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.hero-secondary-cta:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Slider Dots Navigation */
 .slider-dots {
   position: absolute;
-  bottom: 20px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 10px;
+  gap: 12px;
   z-index: 10;
 }
 
 .slider-dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.7);
   background-color: transparent;
@@ -148,22 +196,24 @@
 
 .slider-dot.active {
   background-color: white;
-  transform: scale(1.2);
+  transform: scale(1.3);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-/* Movie Sections */
+/* Movie Sections with improved spacing */
 .movie-section {
-  padding: 0 2rem 2rem;
+  padding: 0 2rem 4rem; /* Increased bottom padding for better section spacing */
+  margin-bottom: 2rem;
 }
 
 .section-title {
   color: #A6CFD5;
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  margin-bottom: 2rem; /* Increased margin for better spacing */
   font-weight: 600;
   padding-left: 0.5rem;
   position: relative;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.8rem;
 }
 
 .section-title::after {
@@ -171,23 +221,25 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 60px;
-  height: 3px;
+  width: 80px; /* Wider underline */
+  height: 4px;
   background-color: #3498db;
+  border-radius: 2px;
 }
 
 /* Horizontal Movie Rows */
 .movie-row {
   display: flex;
   overflow-x: auto;
-  padding: 1rem 0.5rem;
+  padding: 1.5rem 0.5rem;
   scrollbar-width: thin;
-  gap: 1rem;
+  gap: 1.5rem; /* Increased gap between movie cards */
   scroll-behavior: smooth;
+  padding-bottom: 2rem; /* Added bottom padding */
 }
 
 .movie-row::-webkit-scrollbar {
-  height: 8px;
+  height: 10px;
 }
 
 .movie-row::-webkit-scrollbar-track {
@@ -196,12 +248,12 @@
 }
 
 .movie-row::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(52, 152, 219, 0.5);
   border-radius: 10px;
 }
 
 .movie-row::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(52, 152, 219, 0.7);
 }
 
 .movie-card-container {
@@ -209,25 +261,30 @@
   flex-direction: column;
   height: 100%;
   flex: 0 0 auto;
-  width: 190px;
+  width: 210px; /* Slightly larger cards */
+  transition: transform 0.3s ease;
+}
+
+.movie-card-container:hover {
+  transform: translateY(-10px);
 }
 
 /* Added styles for proper grid layout with larger posters */
 .movie-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1.8rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 2rem;
 }
 
 @media (min-width: 768px) {
   .movie-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   }
 }
 
 @media (min-width: 1200px) {
   .movie-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 }
 
@@ -236,61 +293,101 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 300px;
+  min-height: 400px;
 }
 
 .loading {
+  font-size: 1.4rem;
+  opacity: 0.8;
+  color: #3498db;
+  text-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+}
+
+/* Error state */
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.error-message {
+  background-color: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 600px;
+  text-align: center;
   font-size: 1.2rem;
-  opacity: 0.7;
 }
 
 /* Media Queries */
 @media (max-width: 768px) {
   .hero-slider {
-    height: 400px;
+    height: 500px;
   }
   
   .hero-content {
-    min-height: 300px;
+    min-height: 350px;
+  }
+  
+  .hero-info {
+    max-width: 100%;
   }
   
   .hero-title {
-    font-size: 1.8rem;
+    font-size: 2rem;
     max-width: 100%;
   }
   
   .hero-description {
-    font-size: 0.9rem;
+    font-size: 1rem;
     max-width: 100%;
+  }
+  
+  .movie-card-container {
+    width: 180px;
+  }
+  
+  .section-title {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-slider {
+    height: 450px;
+  }
+  
+  .hero-title {
+    font-size: 1.7rem;
   }
   
   .movie-card-container {
     width: 150px;
   }
   
-  .section-title {
-    font-size: 1.2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-slider {
-    height: 350px;
-  }
-  
-  .hero-title {
-    font-size: 1.5rem;
-  }
-  
-  .movie-card-container {
-    width: 130px;
-  }
-  
   .hero-info {
-    padding: 1rem;
+    padding: 1.5rem;
   }
   
   .movie-section {
-    padding: 0 1rem 1.5rem;
+    padding: 0 1rem 3rem;
   }
+}
+
+/* Animation for hero description */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-slide.active .hero-info {
+  animation: fadeInUp 1s forwards;
 }

@@ -11,6 +11,7 @@ const MovieCard = ({ movie, showAddToPlaylist = true, onAddToPlaylist }) => {
   const { themeColors } = useTheme();
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [isWatched, setIsWatched] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -19,19 +20,27 @@ const MovieCard = ({ movie, showAddToPlaylist = true, onAddToPlaylist }) => {
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : 'https://via.placeholder.com/500x750?text=No+Poster';
 
-  // Check if movie is in liked playlist when component mounts
+  // Check if movie is in liked/watched playlists when component mounts
   useEffect(() => {
     if (currentUser && currentUser.playlists) {
+      // Check if in Liked playlist
       const likedPlaylist = currentUser.playlists.find(p => p.name === 'Liked');
       if (likedPlaylist) {
         const isInLiked = likedPlaylist.movies.some(m => m.id === movie.id);
         setIsLiked(isInLiked);
       }
+      
+      // Check if in Watched playlist
+      const watchedPlaylist = currentUser.playlists.find(p => p.name === 'Watched');
+      if (watchedPlaylist) {
+        const isInWatched = watchedPlaylist.movies.some(m => m.id === movie.id);
+        setIsWatched(isInWatched);
+      }
     }
   }, [currentUser, movie.id]);
 
   const handleCardClick = () => {
-    // Navigate to movie detail page instead of showing modal
+    // Navigate to movie detail page
     navigate(`/movie/${movie.id}`);
   };
 
@@ -69,6 +78,23 @@ const MovieCard = ({ movie, showAddToPlaylist = true, onAddToPlaylist }) => {
     
     // Add to or remove from default "Liked" playlist
     addToDefaultPlaylist(movie, 'Liked', newLikedState);
+  };
+  
+  const handleWatchedClick = (e) => {
+    e.stopPropagation(); // Prevent triggering navigation
+    
+    if (!currentUser) {
+      // If no user is logged in, prompt to login
+      alert("Please log in to mark movies as watched");
+      return;
+    }
+    
+    // Toggle watched state
+    const newWatchedState = !isWatched;
+    setIsWatched(newWatchedState);
+    
+    // Add to or remove from default "Watched" playlist
+    addToDefaultPlaylist(movie, 'Watched', newWatchedState);
   };
 
   const handlePlaylistSelected = (playlistId) => {
@@ -126,6 +152,15 @@ const MovieCard = ({ movie, showAddToPlaylist = true, onAddToPlaylist }) => {
               title="Like"
             >
               <span className="heart-icon">{isLiked ? '♥' : '♡'}</span>
+            </button>
+            
+            <button 
+              className={`watched-btn ${isWatched ? 'active' : ''}`}
+              onClick={handleWatchedClick}
+              aria-label={isWatched ? "Remove from watched" : "Add to watched"}
+              title="Watched"
+            >
+              <span className="watched-icon">{isWatched ? '✓' : '👁️'}</span>
             </button>
             
             <button 

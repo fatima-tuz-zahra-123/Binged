@@ -10,7 +10,6 @@ const Home = () => {
   const { themeColors } = useTheme();
   const navigate = useNavigate();
   
-  const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
   const [topRatedMovies, setTopRatedMovies] = useState([]);
   const [popularMovies, setPopularMovies] = useState([]);
   const [upcomingMovies, setUpcomingMovies] = useState([]);
@@ -44,18 +43,31 @@ const Home = () => {
         const upcoming = await fetchUpcomingMovies();
         console.log(`Fetched ${upcoming?.length || 0} upcoming movies`);
         
-        // Filter to only include movies with backdrop images for hero section
+        // Filter movies with backdrop images and high ratings for hero section
         const potentialHeroMovies = [
-          ...topRated.filter(movie => movie.backdrop_path && movie.vote_average >= 7).slice(0, 3),
-          ...popular.filter(movie => movie.backdrop_path && movie.vote_average >= 7).slice(0, 3),
+          ...topRated.filter(movie => movie.backdrop_path && movie.vote_average >= 7.5).slice(0, 3),
+          ...popular.filter(movie => movie.backdrop_path && movie.vote_average >= 7.2).slice(0, 3),
           ...upcoming.filter(movie => movie.backdrop_path).slice(0, 2)
         ];
         
-        // Set hero movies for slider
-        setHeroMovies(potentialHeroMovies.slice(0, 6));
+        // Set hero movies for slider, ensuring diversity in selections
+        const selectedHeroMovies = [];
+        const movieIds = new Set();
+        
+        // Prioritize movies with highest ratings and ensure variety
+        potentialHeroMovies.sort((a, b) => b.vote_average - a.vote_average);
+        
+        // Select up to 6 diverse movies for the hero slider
+        for (const movie of potentialHeroMovies) {
+          if (!movieIds.has(movie.id) && selectedHeroMovies.length < 6) {
+            selectedHeroMovies.push(movie);
+            movieIds.add(movie.id);
+          }
+        }
+        
+        setHeroMovies(selectedHeroMovies);
         
         // Set category movies
-        setNowPlayingMovies(nowPlaying);
         setTopRatedMovies(topRated);
         setPopularMovies(popular);
         setUpcomingMovies(upcoming);
@@ -76,7 +88,7 @@ const Home = () => {
     if (heroMovies.length > 0) {
       slideIntervalRef.current = setInterval(() => {
         setActiveSlide(prev => (prev + 1) % heroMovies.length);
-      }, 6000);
+      }, 8000); // Extended interval for better user experience
     }
     
     return () => {
@@ -104,6 +116,33 @@ const Home = () => {
   const titleStyle = {
     color: themeColors.primary
   };
+  
+  // Get genre names for hero movies
+  const getMovieGenres = (genreIds) => {
+    const genreMap = {
+      28: 'Action',
+      12: 'Adventure',
+      16: 'Animation',
+      35: 'Comedy',
+      80: 'Crime',
+      99: 'Documentary',
+      18: 'Drama',
+      10751: 'Family',
+      14: 'Fantasy',
+      36: 'History',
+      27: 'Horror',
+      10402: 'Music',
+      9648: 'Mystery',
+      10749: 'Romance',
+      878: 'Sci-Fi',
+      10770: 'TV Movie',
+      53: 'Thriller',
+      10752: 'War',
+      37: 'Western'
+    };
+    
+    return genreIds?.map(id => genreMap[id]).filter(Boolean).slice(0, 3) || [];
+  };
 
   return (
     <div className="home-page" style={homeStyle}>
@@ -127,8 +166,8 @@ const Home = () => {
                   <div className="hero-info">
                     <h1 className="hero-title">{movie.title}</h1>
                     <p className="hero-description">
-                      {movie.overview.length > 180 
-                        ? `${movie.overview.substring(0, 180)}...` 
+                      {movie.overview.length > 220 
+                        ? `${movie.overview.substring(0, 220)}...` 
                         : movie.overview}
                     </p>
                     <div className="hero-metadata">
@@ -136,20 +175,34 @@ const Home = () => {
                       {movie.release_date && (
                         <span className="year">{new Date(movie.release_date).getFullYear()}</span>
                       )}
+                      {getMovieGenres(movie.genre_ids).map(genre => (
+                        <span key={genre} className="genre">{genre}</span>
+                      ))}
                     </div>
-                    <button 
-                      className="hero-cta"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/movie/${movie.id}`);
-                      }}
-                      style={{
-                        backgroundColor: themeColors.primary,
-                        color: themeColors.buttonText
-                      }}
-                    >
-                      View Details
-                    </button>
+                    <div className="hero-buttons">
+                      <button 
+                        className="hero-cta"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/movie/${movie.id}`);
+                        }}
+                        style={{
+                          backgroundColor: themeColors.primary,
+                          color: themeColors.buttonText
+                        }}
+                      >
+                        View Details
+                      </button>
+                      <button 
+                        className="hero-secondary-cta"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToPlaylist(movie);
+                        }}
+                      >
+                        Add to Playlist
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -169,81 +222,67 @@ const Home = () => {
         </div>
       )}
 
-      {isLoading ? (
-        <div className="loading-container">
-          <div className="loading">Loading movies...</div>
-        </div>
-      ) : error ? (
-        <div className="error-container">
-          <div className="error-message">{error}</div>
-        </div>
-      ) : (
-        <>
-          {/* Top Rated Movies Section */}
-          <div className="movie-section">
-            <h2 className="section-title" style={titleStyle}>Top Rated Movies ⭐</h2>
-            <div className="movie-row">
-              {topRatedMovies.slice(0, 6).map((movie) => (
-                <div className="movie-card-container" key={movie.id}>
-                  <MovieCard
-                    movie={movie}
-                    showAddToPlaylist
-                    onAddToPlaylist={handleAddToPlaylist}
-                  />
-                </div>
-              ))}
-            </div>
+      <div className="content-container">
+        {isLoading ? (
+          <div className="loading-container">
+            <div className="loading">Loading movies...</div>
           </div>
+        ) : error ? (
+          <div className="error-container">
+            <div className="error-message">{error}</div>
+          </div>
+        ) : (
+          <>
+            {/* Top Rated Movies Section */}
+            <div className="movie-section">
+              <h2 className="section-title" style={titleStyle}>Top Rated Movies ⭐</h2>
+              <div className="movie-row">
+                {topRatedMovies.slice(0, 12).map((movie) => (
+                  <div className="movie-card-container" key={movie.id}>
+                    <MovieCard
+                      movie={movie}
+                      showAddToPlaylist
+                      onAddToPlaylist={handleAddToPlaylist}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
 
-          {/* New Releases Section */}
-          <div className="movie-section">
-            <h2 className="section-title" style={titleStyle}>New Releases 🍿</h2>
-            <div className="movie-row">
-              {upcomingMovies.slice(0, 6).map((movie) => (
-                <div className="movie-card-container" key={movie.id}>
-                  <MovieCard
-                    movie={movie}
-                    showAddToPlaylist
-                    onAddToPlaylist={handleAddToPlaylist}
-                  />
-                </div>
-              ))}
+            {/* New Releases Section */}
+            <div className="movie-section">
+              <h2 className="section-title" style={titleStyle}>New Releases 🍿</h2>
+              <div className="movie-row">
+                {upcomingMovies.slice(0, 12).map((movie) => (
+                  <div className="movie-card-container" key={movie.id}>
+                    <MovieCard
+                      movie={movie}
+                      showAddToPlaylist
+                      onAddToPlaylist={handleAddToPlaylist}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Fan Favorites Section */}
-          <div className="movie-section">
-            <h2 className="section-title" style={titleStyle}>Fan Favorites ❤️</h2>
-            <div className="movie-row">
-              {popularMovies.slice(0, 6).map((movie) => (
-                <div className="movie-card-container" key={movie.id}>
-                  <MovieCard
-                    movie={movie}
-                    showAddToPlaylist
-                    onAddToPlaylist={handleAddToPlaylist}
-                  />
-                </div>
-              ))}
+            {/* Fan Favorites Section */}
+            <div className="movie-section">
+              <h2 className="section-title" style={titleStyle}>Fan Favorites ❤️</h2>
+              <div className="movie-row">
+                {popularMovies.slice(0, 12).map((movie) => (
+                  <div className="movie-card-container" key={movie.id}>
+                    <MovieCard
+                      movie={movie}
+                      showAddToPlaylist
+                      onAddToPlaylist={handleAddToPlaylist}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-
-          {/* Now Playing Section */}
-          <div className="movie-section">
-            <h2 className="section-title" style={titleStyle}>Now Playing 🎬</h2>
-            <div className="movie-row">
-              {nowPlayingMovies.slice(0, 6).map((movie) => (
-                <div className="movie-card-container" key={movie.id}>
-                  <MovieCard
-                    movie={movie}
-                    showAddToPlaylist
-                    onAddToPlaylist={handleAddToPlaylist}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

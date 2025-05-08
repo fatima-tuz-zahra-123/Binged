@@ -71,28 +71,77 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
-.add-to-playlist-btn {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
+/* Movie Actions Styling */
+.movie-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin-top: 15px;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.watched-btn, .like-btn, .add-to-playlist-btn {
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.watched-btn:hover, .like-btn:hover, .add-to-playlist-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+.watched-btn {
+  background-color: transparent;
+  border: 2px solid #2ecc71;
+  color: #2ecc71;
+}
+
+.watched-btn.active {
+  background-color: #2ecc71;
+  color: white;
+  border: 2px solid transparent;
+}
+
+.like-btn {
+  background-color: transparent;
+  border: 2px solid #e74c3c;
+  color: #e74c3c;
+}
+
+.like-btn.active {
+  background-color: #e74c3c;
+  color: white;
+  border: 2px solid transparent;
+}
+
+.add-to-playlist-btn {
+  border: none;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
 }
 
 .add-to-playlist-btn:hover {
-  transform: translateY(-3px);
   opacity: 0.9;
 }
 
 .playlist-dropdown-wrapper {
   position: absolute;
-  top: 100%;
+  top: calc(100% - 10px);
   left: 0;
   right: 0;
   z-index: 10;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .movie-info {
@@ -183,10 +232,12 @@
   transition: transform 0.3s ease;
   border-radius: 10px;
   overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .cast-member:hover {
   transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .actor-photo {
@@ -199,6 +250,11 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.cast-member:hover .actor-photo img {
+  transform: scale(1.1);
 }
 
 .no-photo {
@@ -356,5 +412,16 @@
   
   .cast-list {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+  
+  .movie-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .watched-btn, .like-btn, .add-to-playlist-btn {
+    flex: 1 1 auto;
+    min-width: 120px;
   }
 }
