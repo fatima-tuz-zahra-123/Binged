@@ -1,11 +1,30 @@
-.discover-page {
+.playlist-detail-page {
   min-height: 100vh;
   padding: 24px;
 }
 
-.discover-page h1 {
-  margin: 0 0 24px 0;
+.playlist-header {
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.playlist-header h1 {
+  margin: 0 0 12px 0;
   font-size: 28px;
+}
+
+.playlist-header p {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.playlist-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
 }
 
 .movies-grid {
@@ -49,19 +68,16 @@
 }
 
 .movie-info p {
-  margin: 0 0 8px 0;
+  margin: 0;
   font-size: 14px;
   opacity: 0.8;
 }
 
-.movie-rating {
-  font-size: 14px;
-  font-weight: 500;
-}
-
 .loading {
-  text-align: center;
-  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
   font-size: 18px;
 }
 
@@ -71,33 +87,16 @@
   font-size: 18px;
 }
 
-.load-more {
-  display: block;
-  margin: 24px auto;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.load-more:hover {
-  opacity: 0.9;
-}
-
-.load-more:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
 @media (max-width: 768px) {
-  .discover-page {
+  .playlist-detail-page {
     padding: 16px;
   }
 
-  .discover-page h1 {
+  .playlist-header {
+    padding: 16px;
+  }
+
+  .playlist-header h1 {
     font-size: 24px;
   }
 
@@ -105,4 +104,4 @@
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 16px;
   }
-}
+} 

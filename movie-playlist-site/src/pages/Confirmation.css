@@ -1,0 +1,70 @@
+.confirmation-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.confirmation-container {
+  width: 100%;
+  max-width: 500px;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.confirmation-content {
+  text-align: center;
+}
+
+.confirmation-content h1 {
+  margin-bottom: 24px;
+  font-size: 28px;
+}
+
+.status-message {
+  margin-bottom: 24px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.status-message.verifying {
+  color: #666;
+}
+
+.status-message.success {
+  color: #4CAF50;
+}
+
+.status-message.error {
+  color: #f44336;
+}
+
+.retry-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.retry-button:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 600px) {
+  .confirmation-container {
+    padding: 24px;
+  }
+
+  .confirmation-content h1 {
+    font-size: 24px;
+  }
+
+  .status-message {
+    font-size: 16px;
+  }
+} 

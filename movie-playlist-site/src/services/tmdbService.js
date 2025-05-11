@@ -1,8 +1,11 @@
 // services/tmdbService.js
 import axios from "axios";
 
+// Import environment variables
+const { REACT_APP_TMDB_API_KEY } = process.env;
+
 // Direct API key for development - In production, use environment variables
-const apiKey = "6137d27c7dfa2531ac01bcb1f4a7f018";
+const apiKey = REACT_APP_TMDB_API_KEY;
 console.log("TMDB API Key loaded:", apiKey ? "Key is present" : "Key is missing");
 
 const tmdb = axios.create({

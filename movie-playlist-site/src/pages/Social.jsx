@@ -4,7 +4,7 @@ import { useUser } from '../contexts/UserContext';
 import './Social.css';
 
 const Social = () => {
-  const { currentUser, users, addFriend, acceptFriendRequest, getActiveFriends, getFriendRequests } = useUser();
+  const { currentUser, session, users, addFriend, acceptFriendRequest, getActiveFriends, getFriendRequests } = useUser();
   const [friends, setFriends] = useState([]);
   const [friendRequests, setFriendRequests] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,7 +76,7 @@ const Social = () => {
     );
   };
 
-  if (!currentUser) {
+  if (!session) {
     return (
       <div className="page social-page">
         <div className="auth-prompt">
@@ -251,4 +251,4 @@ const Social = () => {
   );
 };
 
-export default Social;
+export default Social; 

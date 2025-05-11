@@ -1,50 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useUser } from '../contexts/UserContext';
+import { signUpWithEmail } from '../services/signUp.js'; // Adjust the path accordingly
 import './Auth.css';
+
+
 
 const Signup = () => {
   const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { register } = useUser();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+  const isNavigating = useRef(false);
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    
-    if (!username || !email || !password || !confirmPassword) {
+
+    if (isNavigating.current) return;
+
+    // Basic validation
+    if (!username || !fullName || !email || !password || !confirmPassword || !birthDate ) {
       setError('Please fill in all fields');
       return;
     }
-    
+
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-    
+
     if (password.length < 6) {
       setError('Password must be at least 6 characters long');
       return;
     }
-    
+
     setError('');
     setIsLoading(true);
-    
+
     try {
-      const result = register(username, email, password);
-      
+      const result = await signUpWithEmail({
+        email,
+        password,
+        fullName,
+        username,
+        birthDate,
+      });
+
       if (result.success) {
-        navigate('/');
+        isNavigating.current = true;
+        navigate('/confirmation', { replace: true });
       } else {
-        setError(result.message);
+        setError(result.error || 'Signup failed');
       }
+      
     } catch (err) {
-      setError('An error occurred. Please try again.');
       console.error(err);
+      setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -57,10 +74,22 @@ const Signup = () => {
           <h2>Create an Account</h2>
           <p>Join Binged to track, share, and discover movies</p>
         </div>
-        
+
         {error && <div className="auth-error">{error}</div>}
-        
+
         <form className="auth-form" onSubmit={handleSignup}>
+          <div className="form-control">
+            <label htmlFor="fullName">Full Name</label>
+            <input
+              id="fullName"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Enter your full name"
+              disabled={isLoading}
+            />
+          </div>
+
           <div className="form-control">
             <label htmlFor="username">Username</label>
             <input
@@ -72,7 +101,7 @@ const Signup = () => {
               disabled={isLoading}
             />
           </div>
-          
+
           <div className="form-control">
             <label htmlFor="email">Email</label>
             <input
@@ -84,31 +113,60 @@ const Signup = () => {
               disabled={isLoading}
             />
           </div>
-          
+
+          <div className="form-control">
+            <label htmlFor="birthDate">Birth Date</label>
+            <input
+              id="birthDate"
+              type="date"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+
+
           <div className="form-control">
             <label htmlFor="password">Password</label>
             <input
               id="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Create a password"
               disabled={isLoading}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="toggle-password"
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+            <small>
+              Strength: {password.length >= 10 ? 'Strong' : password.length >= 6 ? 'Moderate' : 'Weak'}
+            </small>
           </div>
-          
+
           <div className="form-control">
             <label htmlFor="confirmPassword">Confirm Password</label>
             <input
               id="confirmPassword"
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm your password"
               disabled={isLoading}
             />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              className="toggle-password"
+            >
+              {showConfirmPassword ? 'Hide' : 'Show'}
+            </button>
           </div>
-          
+
           <button 
             className="auth-button" 
             type="submit" 
@@ -117,7 +175,7 @@ const Signup = () => {
             {isLoading ? 'Creating account...' : 'Sign Up'}
           </button>
         </form>
-        
+
         <div className="auth-footer">
           <p>Already have an account? <Link to="/login">Login</Link></p>
         </div>

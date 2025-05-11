@@ -1,13 +1,19 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
+import { supabase } from '../services/supabaseClient';
 
 export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  // Initialize user state from localStorage if available
   const [currentUser, setCurrentUser] = useState(() => {
     const savedUser = localStorage.getItem('currentUser');
     return savedUser ? JSON.parse(savedUser) : null;
   });
+  
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
+  const sessionTimeout = useRef(null);
+  const isNavigating = useRef(false);
   
   const [users, setUsers] = useState(() => {
     const savedUsers = localStorage.getItem('users');
@@ -19,8 +25,93 @@ export const UserProvider = ({ children }) => {
     return savedFriends ? JSON.parse(savedFriends) : [];
   });
 
+  // Function to clean up all user data
+  const cleanupUserData = useCallback(() => {
+    if (!mounted.current) return;
+    
+    // Clear all state
+    setCurrentUser(null);
+    setSession(null);
+    
+    // Clear all localStorage items
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('userProfile');
+    localStorage.removeItem('sessionExpiry');
+    localStorage.removeItem('userPlaylists');
+    localStorage.removeItem('userConnections');
+    localStorage.removeItem('friends');
+    
+    // Remove any active Supabase subscriptions
+    supabase.removeAllChannels();
+  }, []);
+
+  // Handle auth state changes
+  const handleAuthStateChange = useCallback(async (event, session) => {
+    if (!mounted.current) return;
+
+    // Clear any existing timeout
+    if (sessionTimeout.current) {
+      clearTimeout(sessionTimeout.current);
+    }
+
+    // Set session with a small delay to prevent rapid state changes
+    sessionTimeout.current = setTimeout(() => {
+      if (mounted.current) {
+        if (event === 'SIGNED_OUT') {
+          cleanupUserData();
+        } else if (event === 'TOKEN_REFRESHED' && session) {
+          localStorage.setItem('sessionExpiry', new Date(session.expires_at).toISOString());
+        }
+        
+        // Only update session if we're not already navigating
+        if (!isNavigating.current) {
+          setSession(session);
+        }
+      }
+    }, 100);
+  }, [cleanupUserData]);
+
+  // Check for existing session and set up auth listener
+  useEffect(() => {
+    mounted.current = true;
+
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (mounted.current) {
+          // Set initial session with a small delay
+          sessionTimeout.current = setTimeout(() => {
+            if (mounted.current && !isNavigating.current) {
+              setSession(currentSession);
+              setLoading(false);
+            }
+          }, 100);
+        }
+      } catch (error) {
+        console.error('Error getting session:', error);
+        if (mounted.current) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
+
+    return () => {
+      mounted.current = false;
+      if (sessionTimeout.current) {
+        clearTimeout(sessionTimeout.current);
+      }
+      subscription.unsubscribe();
+    };
+  }, [handleAuthStateChange]);
+
   // Save user data to localStorage whenever it changes
   useEffect(() => {
+    if (!mounted.current) return;
+    
     if (currentUser) {
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
     } else {
@@ -29,311 +120,171 @@ export const UserProvider = ({ children }) => {
   }, [currentUser]);
 
   useEffect(() => {
+    if (!mounted.current) return;
     localStorage.setItem('users', JSON.stringify(users));
   }, [users]);
 
   useEffect(() => {
+    if (!mounted.current) return;
     localStorage.setItem('friends', JSON.stringify(friends));
   }, [friends]);
 
-  // Register new user
-  const register = (username, email, password) => {
-    // Check if username or email already exists
-    const userExists = users.some(
-      user => user.username === username || user.email === email
-    );
-    
-    if (userExists) {
-      return { success: false, message: 'Username or email already exists' };
-    }
-
-    const newUser = {
-      id: Date.now().toString(),
-      username,
-      email,
-      password, // In a real app, you would hash this password!
-      favoriteGenres: [],
-      watchedMovies: [],
-      likedMovies: [],
-      playlists: []
-    };
-
-    setUsers([...users, newUser]);
-    setCurrentUser(newUser);
-    return { success: true, user: newUser };
-  };
-
-  // Login user
-  const login = (email, password) => {
-    const user = users.find(
-      user => user.email === email && user.password === password
-    );
-    
-    if (user) {
-      setCurrentUser(user);
-      return { success: true, user };
-    }
-    
-    return { success: false, message: 'Invalid email or password' };
-  };
-
-  // Logout user
-  const logout = () => {
-    setCurrentUser(null);
-  };
-
-  // Add friend connection
-  const addFriend = (friendId) => {
-    if (!currentUser) return { success: false, message: 'Not logged in' };
-    
-    // Check if friendship already exists
-    const friendshipExists = friends.some(
-      f => (f.user1Id === currentUser.id && f.user2Id === friendId) ||
-           (f.user1Id === friendId && f.user2Id === currentUser.id)
-    );
-    
-    if (friendshipExists) {
-      return { success: false, message: 'Already connected' };
-    }
-    
-    const newFriend = {
-      id: Date.now().toString(),
-      user1Id: currentUser.id,
-      user2Id: friendId,
-      status: 'pending', // Can be 'pending', 'accepted', 'rejected'
-      createdAt: new Date().toISOString()
-    };
-    
-    setFriends([...friends, newFriend]);
-    return { success: true, friendship: newFriend };
-  };
-
-  // Accept friend request
-  const acceptFriendRequest = (friendshipId) => {
-    if (!currentUser) return { success: false, message: 'Not logged in' };
-    
-    const updatedFriends = friends.map(f => {
-      if (f.id === friendshipId && f.user2Id === currentUser.id) {
-        return { ...f, status: 'accepted' };
-      }
-      return f;
+  // Social functions
+  const getActiveFriends = useCallback(() => {
+    if (!currentUser) return [];
+    return friends.filter(friend => 
+      friend.status === 'accepted' && 
+      (friend.user_id === currentUser.id || friend.friend_id === currentUser.id)
+    ).map(friend => {
+      const friendId = friend.user_id === currentUser.id ? friend.friend_id : friend.user_id;
+      const friendUser = users.find(u => u.id === friendId);
+      return {
+        ...friend,
+        user: friendUser,
+        compatibility: calculateCompatibility(friendUser)
+      };
     });
-    
-    setFriends(updatedFriends);
-    return { success: true };
-  };
+  }, [currentUser, friends, users]);
 
-  // Calculate movie taste compatibility with another user
-  const calculateBlendCompatibility = (userId) => {
-    if (!currentUser) return 0;
-    
-    const otherUser = users.find(user => user.id === userId);
-    if (!otherUser) return 0;
-    
-    // Compare liked movies - safely handle missing arrays with default empty arrays
-    const myLiked = new Set((currentUser.likedMovies || []).map(m => m.id));
-    const theirLiked = new Set((otherUser.likedMovies || []).map(m => m.id));
-    
-    // Get movie IDs from playlists
-    const myPlaylistMovies = new Set();
-    const theirPlaylistMovies = new Set();
-    
-    // Extract movie IDs from current user's playlists
-    if (currentUser.playlists && currentUser.playlists.length > 0) {
-      currentUser.playlists.forEach(playlist => {
-        if (playlist.movies && playlist.movies.length > 0) {
-          playlist.movies.forEach(movie => {
-            if (movie && movie.id) {
-              myPlaylistMovies.add(movie.id);
-            }
-          });
-        }
-      });
+  const getFriendRequests = useCallback(() => {
+    if (!currentUser) return [];
+    return friends.filter(friend => 
+      friend.status === 'pending' && 
+      friend.friend_id === currentUser.id
+    ).map(friend => {
+      const requestingUser = users.find(u => u.id === friend.user_id);
+      return {
+        ...friend,
+        user: requestingUser
+      };
+    });
+  }, [currentUser, friends, users]);
+
+  const addFriend = useCallback(async (userId) => {
+    if (!currentUser) return { success: false, message: 'Not logged in' };
+
+    try {
+      const { data, error } = await supabase
+        .from('user_connections')
+        .insert([
+          {
+            user_id: currentUser.id,
+            friend_id: userId,
+            status: 'pending'
+          }
+        ]);
+
+      if (error) throw error;
+
+      const newFriend = {
+        id: data[0].id,
+        user_id: currentUser.id,
+        friend_id: userId,
+        status: 'pending'
+      };
+
+      setFriends(prev => [...prev, newFriend]);
+      return { success: true, data: newFriend };
+    } catch (error) {
+      console.error('Error adding friend:', error);
+      return { success: false, message: error.message };
     }
-    
-    // Extract movie IDs from other user's playlists
-    if (otherUser.playlists && otherUser.playlists.length > 0) {
-      otherUser.playlists.forEach(playlist => {
-        if (playlist.movies && playlist.movies.length > 0) {
-          playlist.movies.forEach(movie => {
-            if (movie && movie.id) {
-              theirPlaylistMovies.add(movie.id);
-            }
-          });
-        }
-      });
+  }, [currentUser]);
+
+  const acceptFriendRequest = useCallback(async (friendshipId) => {
+    if (!currentUser) return { success: false, message: 'Not logged in' };
+
+    try {
+      const { data, error } = await supabase
+        .from('user_connections')
+        .update({ status: 'accepted' })
+        .eq('id', friendshipId)
+        .eq('friend_id', currentUser.id);
+
+      if (error) throw error;
+
+      setFriends(prev => 
+        prev.map(friend => 
+          friend.id === friendshipId 
+            ? { ...friend, status: 'accepted' }
+            : friend
+        )
+      );
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error accepting friend request:', error);
+      return { success: false, message: error.message };
     }
+  }, [currentUser]);
+
+  // Helper function to calculate compatibility between users
+  const calculateCompatibility = useCallback((friendUser) => {
+    if (!currentUser || !friendUser) return 0;
     
-    // Combine liked movies with playlist movies
-    const allMyMovies = new Set([...myLiked, ...myPlaylistMovies]);
-    const allTheirMovies = new Set([...theirLiked, ...theirPlaylistMovies]);
+    // Get user preferences
+    const currentUserPrefs = currentUser.favoriteGenres || [];
+    const friendUserPrefs = friendUser.favoriteGenres || [];
     
-    // Intersection of all movies (common movies)
-    const commonMovies = [...allMyMovies].filter(id => allTheirMovies.has(id));
+    // Calculate genre overlap
+    const commonGenres = currentUserPrefs.filter(genre => 
+      friendUserPrefs.includes(genre)
+    );
     
-    // Calculate compatibility percentage
-    const totalUniqueMovies = new Set([...allMyMovies, ...allTheirMovies]);
-    
-    const compatibilityScore = totalUniqueMovies.size > 0 
-      ? Math.round((commonMovies.length / totalUniqueMovies.size) * 100)
+    // Calculate compatibility score (0-100)
+    const totalGenres = new Set([...currentUserPrefs, ...friendUserPrefs]).size;
+    const compatibilityScore = totalGenres > 0 
+      ? Math.round((commonGenres.length / totalGenres) * 100)
       : 0;
     
     return compatibilityScore;
-  };
+  }, [currentUser]);
 
-  // Get active friends (accepted status)
-  const getActiveFriends = () => {
-    if (!currentUser) return [];
-    
-    return friends
-      .filter(f => 
-        f.status === 'accepted' && 
-        (f.user1Id === currentUser.id || f.user2Id === currentUser.id)
-      )
-      .map(f => {
-        const friendId = f.user1Id === currentUser.id ? f.user2Id : f.user1Id;
-        const friendUser = users.find(u => u.id === friendId);
-        
-        if (friendUser) {
-          return {
-            ...friendUser,
-            compatibility: calculateBlendCompatibility(friendUser.id)
-          };
-        }
-        
-        return null;
-      })
-      .filter(Boolean);
-  };
+  // Logout function
+  const logout = useCallback(async () => {
+    try {
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
 
-  // Get friend requests
-  const getFriendRequests = () => {
-    if (!currentUser) return [];
-    
-    return friends
-      .filter(f => 
-        f.status === 'pending' && 
-        f.user2Id === currentUser.id
-      )
-      .map(f => {
-        const senderUser = users.find(u => u.id === f.user1Id);
-        
-        if (senderUser) {
-          return {
-            friendshipId: f.id,
-            user: senderUser
-          };
-        }
-        
-        return null;
-      })
-      .filter(Boolean);
-  };
-
-  // Update user profile
-  const updateProfile = (updates) => {
-    if (!currentUser) return { success: false, message: 'Not logged in' };
-    
-    const updatedUser = { ...currentUser, ...updates };
-    
-    // Update in current user
-    setCurrentUser(updatedUser);
-    
-    // Update in users array
-    const updatedUsers = users.map(u => 
-      u.id === currentUser.id ? updatedUser : u
-    );
-    
-    setUsers(updatedUsers);
-    return { success: true, user: updatedUser };
-  };
-
-  // Add to or remove from default playlists (like "Liked" playlist)
-  const addToDefaultPlaylist = (movie, playlistName, add = true) => {
-    if (!currentUser) return { success: false, message: 'Not logged in' };
-    
-    // Make a copy of the current user
-    const userCopy = { ...currentUser };
-    
-    // Ensure playlists array exists
-    if (!userCopy.playlists) {
-      userCopy.playlists = [];
+      // Clean up all user data
+      cleanupUserData();
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error signing out:', error);
+      // Even if there's an error, try to clean up
+      cleanupUserData();
+      return { success: false, error: error.message };
     }
-    
-    // Find or create the default playlist
-    let defaultPlaylist = userCopy.playlists.find(p => p.name === playlistName);
-    
-    if (!defaultPlaylist) {
-      defaultPlaylist = {
-        id: Date.now().toString(),
-        name: playlistName,
-        description: `Your ${playlistName.toLowerCase()} movies`,
-        isSystem: true,
-        createdAt: new Date().toISOString(),
-        movies: []
-      };
-      userCopy.playlists.push(defaultPlaylist);
-    } else if (!defaultPlaylist.movies) {
-      defaultPlaylist.movies = [];
-    }
-    
-    // Add or remove the movie
-    if (add) {
-      // Check if movie already exists in the playlist
-      const movieExists = defaultPlaylist.movies.some(m => m.id === movie.id);
-      if (!movieExists) {
-        // Add the movie (with simplified movie object to reduce storage size)
-        defaultPlaylist.movies.push({
-          id: movie.id,
-          title: movie.title,
-          poster_path: movie.poster_path,
-          release_date: movie.release_date,
-          vote_average: movie.vote_average,
-          addedAt: new Date().toISOString()
-        });
-      }
-    } else {
-      // Remove the movie
-      defaultPlaylist.movies = defaultPlaylist.movies.filter(m => m.id !== movie.id);
-    }
-    
-    // Update the user in state
-    setCurrentUser(userCopy);
-    
-    // Update the user in users array
-    const updatedUsers = users.map(u => 
-      u.id === currentUser.id ? userCopy : u
-    );
-    
-    setUsers(updatedUsers);
-    
-    return { success: true };
+  }, [cleanupUserData]);
+
+  const value = {
+    currentUser,
+    session,
+    loading,
+    users,
+    friends,
+    setCurrentUser,
+    logout,
+    getActiveFriends,
+    getFriendRequests,
+    addFriend,
+    acceptFriendRequest,
+    isNavigating
   };
 
   return (
-    <UserContext.Provider
-      value={{
-        currentUser,
-        users,
-        friends,
-        register,
-        login,
-        logout,
-        addFriend,
-        acceptFriendRequest,
-        getActiveFriends,
-        getFriendRequests,
-        calculateBlendCompatibility,
-        updateProfile,
-        addToDefaultPlaylist
-      }}
-    >
-      {children}
+    <UserContext.Provider value={value}>
+      {!loading && children}
     </UserContext.Provider>
   );
 };
 
-// Custom hook for using the auth context
-export const useUser = () => useContext(UserContext);
-
-export default UserProvider;
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (context === undefined) {
+    throw new Error('useUser must be used within a UserProvider');
+  }
+  return context;
+};

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-// Remove the unused import
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { signUpWithEmail } from '../services/signUp';
 
 export default function SignupForm() {
@@ -9,14 +8,11 @@ export default function SignupForm() {
     username: '',
     email: '',
     password: '',
-    gender: '',
-    birthDate: '',
-    phone: ''
+    birthDate: ''
   });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  // Remove this line since we're not using navigate
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,7 +29,6 @@ export default function SignupForm() {
       setMessage(`❌ ${result.error}`);
       setLoading(false);
     } else {
-      // Change the message to be clear about email confirmation requirement
       setMessage('✅ Sign-up initiated! Please check your email and click the confirmation link to activate your account.');
       // Don't navigate away - let user see the instruction to check email
     }
@@ -73,36 +68,9 @@ export default function SignupForm() {
           required 
           style={{ display: 'block', width: '100%', padding: '8px', marginBottom: '10px' }}
         />
-         <select
-          name="gender"
-          onChange={handleChange}
-          required
-          value={formData.gender}
-          style={{ 
-            display: 'block', 
-            width: '100%', 
-            padding: '8px', 
-            marginBottom: '10px',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            backgroundColor: 'white'
-          }}
-        >
-          <option value="" disabled>Select Gender</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="prefer-not-to-say">Prefer not to say</option>
-        </select>
         <input 
           name="birthDate" 
           type="date" 
-          onChange={handleChange} 
-          required 
-          style={{ display: 'block', width: '100%', padding: '8px', marginBottom: '10px' }}
-        />
-        <input 
-          name="phone" 
-          placeholder="Phone" 
           onChange={handleChange} 
           required 
           style={{ display: 'block', width: '100%', padding: '8px', marginBottom: '10px' }}

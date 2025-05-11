@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import { useUser } from "../contexts/UserContext";
 import "./Navbar.css";
@@ -38,24 +38,16 @@ const Navbar = () => {
   };
   
   const toggleUserDropdown = () => {
-    setUserDropdownOpen(!userDropdownOpen);
+    setUserDropdownOpen(prev => !prev);
   };
   
-  const handleLogout = () => {
-    logout();
-    setUserDropdownOpen(false);
-    navigate('/');
-  };
-  
-  // Enhanced navigation handler that uses direct programmatic navigation
-  const handleNavigate = (e, path) => {
-    e.preventDefault(); // Prevent default link behavior
-    e.stopPropagation(); // Stop event propagation
-    setMenuOpen(false);
-    setUserDropdownOpen(false);
-    
-    // Direct programmatic navigation
-    navigate(path);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
   
   // Check if a link is active based on current location
@@ -80,10 +72,10 @@ const Navbar = () => {
   return (
     <nav className="navbar" style={navbarStyle}>
       <div className="navbar-container">
-        <a href="/" className="logo" onClick={(e) => handleNavigate(e, '/')}>
+        <Link to="/" className="logo">
           <span className="logo-icon">🎬</span> 
           <span className="logo-text">Binged</span>
-        </a>
+        </Link>
         
         <div className="mobile-menu-toggle" onClick={toggleMenu}>
           <span></span>
@@ -93,21 +85,21 @@ const Navbar = () => {
         
         <div className={`nav-content ${menuOpen ? 'active' : ''}`}>
           <div className="nav-links">
-            <a href="/" className={isActive('/')} onClick={(e) => handleNavigate(e, '/')}>
+            <Link to="/" className={isActive('/')}>
               Home
-            </a>
-            <a href="/discover" className={isActive('/discover')} onClick={(e) => handleNavigate(e, '/discover')}>
+            </Link>
+            <Link to="/discover" className={isActive('/discover')}>
               Discover
-            </a>
-            <a href="/playlists" className={isActive('/playlists')} onClick={(e) => handleNavigate(e, '/playlists')}>
+            </Link>
+            <Link to="/playlists" className={isActive('/playlists')}>
               Playlists
-            </a>
-            <a href="/mood" className={isActive('/mood')} onClick={(e) => handleNavigate(e, '/mood')}>
+            </Link>
+            <Link to="/mood" className={isActive('/mood')}>
               Mood
-            </a>
-            <a href="/social" className={isActive('/social')} onClick={(e) => handleNavigate(e, '/social')}>
+            </Link>
+            <Link to="/social" className={isActive('/social')}>
               Social
-            </a>
+            </Link>
           </div>
           
           <div className="nav-actions">
@@ -137,20 +129,18 @@ const Navbar = () => {
                       <p className="dropdown-username">{currentUser.username}</p>
                       <p className="dropdown-email">{currentUser.email}</p>
                     </div>
-                    <a 
-                      href="/profile" 
+                    <Link 
+                      to="/profile" 
                       className="dropdown-item"
-                      onClick={(e) => handleNavigate(e, '/profile')}
                     >
                       <i>👤</i> Profile
-                    </a>
-                    <a 
-                      href="/playlists" 
+                    </Link>
+                    <Link 
+                      to="/playlists" 
                       className="dropdown-item"
-                      onClick={(e) => handleNavigate(e, '/playlists')}
                     >
                       <i>📋</i> My Playlists
-                    </a>
+                    </Link>
                     <button 
                       className="dropdown-item logout-btn"
                       onClick={handleLogout}
@@ -162,12 +152,12 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="auth-links">
-                <a href="/login" className="auth-link" onClick={(e) => handleNavigate(e, '/login')}>
+                <Link to="/login" className="auth-link">
                   Login
-                </a>
-                <a href="/signup" className="auth-link signup-link" onClick={(e) => handleNavigate(e, '/signup')}>
+                </Link>
+                <Link to="/signup" className="auth-link signup-link">
                   Sign Up
-                </a>
+                </Link>
               </div>
             )}
           </div>

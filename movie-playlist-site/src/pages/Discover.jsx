@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { searchMovies, getMovieGenres, discoverMovies } from "../services/tmdbService";
 import MovieCard from "../components/MovieCard";
 import { useTheme } from "../contexts/ThemeContext";
+import { supabase } from "../services/supabaseClient";
 import "./Discover.css";
 
 const Discover = () => {
+  const navigate = useNavigate();
   const { themeColors } = useTheme();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   
   // Search filter states
   const [yearFilter, setYearFilter] = useState("");
@@ -109,131 +116,94 @@ const Discover = () => {
     alert(`"${movie.title}" added to playlist!`);
   };
 
-  return (
-    <div className="discover-page">
-      <div className="discover-container">
-        {/* Left sidebar for advanced search options */}
-        <div className="discover-sidebar">
-          <div className="sidebar-section">
-            <h3>Search By</h3>
-            <form onSubmit={handleSearch}>
-              <div className="search-field">
-                <label htmlFor="movie-query">Movie Title</label>
-                <input
-                  id="movie-query"
-                  type="text"
-                  placeholder="Search movies..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-              </div>
-              
-              <div className="search-field">
-                <label htmlFor="year-filter">Year</label>
-                <select 
-                  id="year-filter" 
-                  value={yearFilter}
-                  onChange={(e) => setYearFilter(e.target.value)}
-                >
-                  <option value="">Any Year</option>
-                  {years.slice(0, 70).map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="search-field">
-                <label htmlFor="rating-filter">Minimum Rating</label>
-                <select 
-                  id="rating-filter" 
-                  value={ratingFilter}
-                  onChange={(e) => setRatingFilter(e.target.value)}
-                >
-                  <option value="">Any Rating</option>
-                  <option value="9">9+</option>
-                  <option value="8">8+</option>
-                  <option value="7">7+</option>
-                  <option value="6">6+</option>
-                  <option value="5">5+</option>
-                </select>
-              </div>
-              
-              <div className="search-field">
-                <label htmlFor="sort-by">Sort By</label>
-                <select 
-                  id="sort-by" 
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="popularity.desc">Popularity (High to Low)</option>
-                  <option value="vote_average.desc">Rating (High to Low)</option>
-                  <option value="primary_release_date.desc">Release Date (Newest)</option>
-                  <option value="primary_release_date.asc">Release Date (Oldest)</option>
-                  <option value="original_title.asc">Title (A-Z)</option>
-                </select>
-              </div>
-              
-              <button type="submit" className="search-button">
-                Search
-              </button>
-            </form>
-          </div>
-        </div>
-        
-        {/* Main content area */}
-        <div className="discover-content">
-          <h1>Discover Movies</h1>
-          
-          {/* Genre buttons */}
-          <div className="genre-buttons">
-            <button 
-              className={`genre-button ${selectedGenre === null ? 'active' : ''}`}
-              onClick={() => handleGenreClick(null)}
-            >
-              All
-            </button>
-            {genres.slice(0, 14).map((genre) => (
-              <button 
-                key={genre.id}
-                className={`genre-button ${selectedGenre === genre.id ? 'active' : ''}`}
-                onClick={() => handleGenreClick(genre.id)}
-              >
-                {genre.name}
-              </button>
-            ))}
-          </div>
-          
-          {/* Results heading */}
-          <div className="results-heading">
-            <h2>
-              {selectedGenre 
-                ? `${genres.find(g => g.id === selectedGenre)?.name} Movies` 
-                : 'Popular Movies'}
-            </h2>
-            <span className="results-count">{results.length} movies found</span>
-          </div>
+  const fetchMovies = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('movies')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range((page - 1) * 20, page * 20 - 1);
 
-          {/* Movies grid */}
-          {isLoading ? (
-            <div className="loading-container">
-              <div className="loading">Loading movies...</div>
-            </div>
-          ) : results.length > 0 ? (
-            <div className="movie-grid">
-              {results.map((movie) => (
-                <MovieCard 
-                  key={movie.id} 
-                  movie={movie} 
-                  showAddToPlaylist 
-                  onAddToPlaylist={handleAddToPlaylist}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="no-results">No movies found matching your criteria. Try adjusting your search.</p>
-          )}
+      if (error) throw error;
+
+      if (data.length < 20) {
+        setHasMore(false);
+      }
+
+      setResults(prev => [...prev, ...data]);
+    } catch (error) {
+      console.error('Error fetching movies:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (!loading && hasMore) {
+      setPage(prev => prev + 1);
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="discover-page" style={{ backgroundColor: themeColors.background }}>
+        <div className="error-message" style={{ color: themeColors.error }}>
+          {error}
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="discover-page" style={{ backgroundColor: themeColors.background }}>
+      <h1 style={{ color: themeColors.text }}>Discover Movies</h1>
+      
+      <div className="movies-grid">
+        {results.map(movie => (
+          <div 
+            key={movie.id} 
+            className="movie-card"
+            style={{ backgroundColor: themeColors.surface }}
+            onClick={() => navigate(`/movie/${movie.id}`)}
+          >
+            <img 
+              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
+              alt={movie.title}
+              className="movie-poster"
+            />
+            <div className="movie-info">
+              <h3 style={{ color: themeColors.text }}>{movie.title}</h3>
+              <p style={{ color: themeColors.textSecondary }}>
+                {new Date(movie.release_date).getFullYear()}
+              </p>
+              <div className="movie-rating" style={{ color: themeColors.primary }}>
+                ★ {movie.vote_average?.toFixed(1) || 'N/A'}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {loading && (
+        <div className="loading" style={{ color: themeColors.text }}>
+          Loading...
+        </div>
+      )}
+
+      {!loading && hasMore && (
+        <button 
+          className="load-more"
+          onClick={loadMore}
+          style={{ 
+            backgroundColor: themeColors.primary,
+            color: themeColors.onPrimary
+          }}
+        >
+          Load More
+        </button>
+      )}
     </div>
   );
 };
