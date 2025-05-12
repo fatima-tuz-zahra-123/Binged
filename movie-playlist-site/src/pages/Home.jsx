@@ -3,23 +3,25 @@ import { useNavigate } from 'react-router-dom';
 import { fetchNowPlayingMovies, fetchTopRatedMovies, fetchPopularMovies, fetchUpcomingMovies } from '../services/tmdbService';
 import MovieCard from '../components/MovieCard';
 import { useTheme } from '../contexts/ThemeContext';
-
+import { useUser } from '../contexts/UserContext';
+import { getRecommendations } from '../services/recommendationService';
 import './Home.css';
 
 const Home = () => {
   const { themeColors } = useTheme();
+  const { currentUser } = useUser();
   const navigate = useNavigate();
   
   const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
   const [topRatedMovies, setTopRatedMovies] = useState([]);
   const [popularMovies, setPopularMovies] = useState([]);
   const [upcomingMovies, setUpcomingMovies] = useState([]);
+  const [recommendedMovies, setRecommendedMovies] = useState([]);
   
   const [isLoading, setIsLoading] = useState(true);
   const [activeSlide, setActiveSlide] = useState(0);
   const slideIntervalRef = useRef(null);
   
-  // Hero slider movies
   const [heroMovies, setHeroMovies] = useState([]);
   const [error, setError] = useState(null);
 
@@ -28,33 +30,32 @@ const Home = () => {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         console.log("Home component: Starting to fetch movies from TMDB...");
+        console.log("Current user ID:", currentUser?.id);
         
-        // Fetch different movie categories
         const nowPlaying = await fetchNowPlayingMovies();
-        console.log(`Fetched ${nowPlaying?.length || 0} now playing movies`);
-        
         const topRated = await fetchTopRatedMovies();
-        console.log(`Fetched ${topRated?.length || 0} top rated movies`);
-        
         const popular = await fetchPopularMovies();
-        console.log(`Fetched ${popular?.length || 0} popular movies`);
-        
         const upcoming = await fetchUpcomingMovies();
-        console.log(`Fetched ${upcoming?.length || 0} upcoming movies`);
-        
-        // Filter to only include movies with backdrop images for hero section
+
+        if (currentUser?.id) {
+          try {
+            const recommendations = await getRecommendations(currentUser.id);
+            console.log("Fetched recommendations:", recommendations);
+            setRecommendedMovies(recommendations);
+          } catch (err) {
+            console.error('Error fetching recommendations:', err);
+          }
+        }
+
         const potentialHeroMovies = [
           ...topRated.filter(movie => movie.backdrop_path && movie.vote_average >= 7).slice(0, 3),
           ...popular.filter(movie => movie.backdrop_path && movie.vote_average >= 7).slice(0, 3),
           ...upcoming.filter(movie => movie.backdrop_path).slice(0, 2)
         ];
-        
-        // Set hero movies for slider
+
         setHeroMovies(potentialHeroMovies.slice(0, 6));
-        
-        // Set category movies
         setNowPlayingMovies(nowPlaying);
         setTopRatedMovies(topRated);
         setPopularMovies(popular);
@@ -69,16 +70,15 @@ const Home = () => {
     };
 
     loadMovies();
-  }, []);
+  }, [currentUser]);
 
-  // Set up automatic slider
   useEffect(() => {
     if (heroMovies.length > 0) {
       slideIntervalRef.current = setInterval(() => {
         setActiveSlide(prev => (prev + 1) % heroMovies.length);
       }, 6000);
     }
-    
+
     return () => {
       if (slideIntervalRef.current) {
         clearInterval(slideIntervalRef.current);
@@ -95,7 +95,6 @@ const Home = () => {
     navigate(`/movie/${movieId}`);
   };
 
-  // Apply theme-based styling
   const homeStyle = {
     backgroundColor: themeColors.background,
     color: themeColors.text,
@@ -107,7 +106,6 @@ const Home = () => {
 
   return (
     <div className="home-page" style={homeStyle}>
-      {/* Hero Slider Section */}
       {heroMovies.length > 0 && (
         <div className="hero-slider">
           <div className="hero-slides">
@@ -155,7 +153,6 @@ const Home = () => {
               </div>
             ))}
           </div>
-          
           <div className="slider-dots">
             {heroMovies.map((_, index) => (
               <button 
@@ -179,7 +176,32 @@ const Home = () => {
         </div>
       ) : (
         <>
-          {/* Top Rated Movies Section */}
+          {/* Recommended Movies Section - Only show if user is logged in */}
+          {currentUser && recommendedMovies.length > 0 && (
+            <div className="movie-section">
+              <h2 className="section-title" style={titleStyle}>Recommended for You 🎯</h2>
+              <div className="movie-row">
+                {recommendedMovies.slice(0, 6).map((movie) => (
+                  <div className="movie-card-container" key={movie.movie_id || movie.id}>
+                    <MovieCard
+                      movie={movie}
+                      showAddToPlaylist
+                      onAddToPlaylist={handleAddToPlaylist}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Fallback if no recommendations */}
+          {currentUser && recommendedMovies.length === 0 && (
+            <div className="movie-section">
+              <h2 className="section-title" style={titleStyle}>Recommended for You 🎯</h2>
+              <p style={{ padding: '0 10px' }}>No recommendations found at the moment. Try adding movies to your playlist to get recommendations!</p>
+            </div>
+          )}
+
           <div className="movie-section">
             <h2 className="section-title" style={titleStyle}>Top Rated Movies ⭐</h2>
             <div className="movie-row">
@@ -195,7 +217,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* New Releases Section */}
           <div className="movie-section">
             <h2 className="section-title" style={titleStyle}>New Releases 🍿</h2>
             <div className="movie-row">
@@ -211,7 +232,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Fan Favorites Section */}
           <div className="movie-section">
             <h2 className="section-title" style={titleStyle}>Fan Favorites ❤️</h2>
             <div className="movie-row">
@@ -227,7 +247,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Now Playing Section */}
           <div className="movie-section">
             <h2 className="section-title" style={titleStyle}>Now Playing 🎬</h2>
             <div className="movie-row">

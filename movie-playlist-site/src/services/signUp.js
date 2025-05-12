@@ -16,7 +16,7 @@ export async function signUpWithEmail({ email, password, fullName, username, bir
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/confirmed-page`,
+        emailRedirectTo: `${window.location.origin}/confirmed`,
         data: {
           full_name: fullName,
           username,

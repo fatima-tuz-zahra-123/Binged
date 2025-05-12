@@ -29,7 +29,7 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/confirmation" element={<Confirmation />} />
-      <Route path="/confirmed-page" element={<ConfirmedPage />} />
+      <Route path="/confirmedPage" element={<ConfirmedPage />} />
       <Route path="/movie/:movieId" element={<MoviePage />} />
       <Route path="/actor/:actorId" element={<ActorPage />} />
       

@@ -48,7 +48,7 @@ const Login = () => {
       const { data: userData, error: userError } = await supabase
         .from('user')
         .select('id, username, full_name, email')
-        .('email', email)
+        .ilike('email', email)
         .limit(1);
 
       if (userError || !userData) {
