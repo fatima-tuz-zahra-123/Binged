@@ -75,12 +75,16 @@
 .movie-actions {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 15px;
+  gap: 16px;
+  margin-top: 20px;
+  opacity: 1 !important; /* Force visibility */
+  visibility: visible !important; /* Force visibility */
+  position: relative;
+  z-index: 5; /* Ensure it's above other elements */
 }
 
 .watched-btn, .like-btn, .add-to-playlist-btn {
-  padding: 12px;
+  padding: 12px 16px;
   border-radius: 8px;
   font-weight: 600;
   font-size: 1rem;
@@ -89,16 +93,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  gap: 8px;
+  border-width: 2px;
+  border-style: solid;
 }
 
 .watched-btn:hover, .like-btn:hover, .add-to-playlist-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
 }
 
 .watched-btn {
-  background-color: transparent;
+  background-color: rgba(46, 204, 113, 0.3); /* Stronger background */
   border: 2px solid #2ecc71;
   color: #2ecc71;
 }
@@ -110,7 +117,7 @@
 }
 
 .like-btn {
-  background-color: transparent;
+  background-color: rgba(231, 76, 60, 0.3); /* Stronger background */
   border: 2px solid #e74c3c;
   color: #e74c3c;
 }
@@ -122,12 +129,22 @@
 }
 
 .add-to-playlist-btn {
-  border: none;
-  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
+  background-color: rgba(52, 152, 219, 0.3); /* Stronger background */
+  border: 2px solid #3498db;
+  color: #3498db;
 }
 
-.add-to-playlist-btn:hover {
-  opacity: 0.9;
+.add-to-playlist-btn.active {
+  background-color: #3498db;
+  color: white;
+  border: 2px solid transparent;
+}
+
+.heart-icon, .watched-icon, .add-icon {
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .playlist-dropdown-wrapper {
@@ -316,10 +333,13 @@
 }
 
 .rating-input {
-  margin-bottom: 15px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.rating-input label {
+  margin-right: 15px;
 }
 
 .rating-input select {
@@ -363,16 +383,18 @@
 }
 
 .review {
-  padding: 20px;
   border-radius: 12px;
-  background-color: rgba(20, 20, 20, 0.8);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .review-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
-  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .reviewer {
@@ -383,11 +405,19 @@
 .review-date {
   font-size: 0.8rem;
   opacity: 0.7;
-  margin-top: 5px;
+  margin-top: 4px;
+}
+
+.review-rating {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 0.9rem;
 }
 
 .review-content {
   line-height: 1.6;
+  white-space: pre-line;
 }
 
 .no-reviews {
@@ -395,6 +425,215 @@
   padding: 30px;
   background-color: rgba(20, 20, 20, 0.5);
   border-radius: 12px;
+}
+
+/* Star Rating Component */
+.star-rating {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.star-btn {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0 2px;
+}
+
+.star {
+  font-size: 24px;
+  color: #e4e5e9;
+  transition: color 200ms;
+}
+
+.star-btn.active .star {
+  color: #ffb400;
+}
+
+.rating-value {
+  margin-left: 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Reviews Containers */
+.reviews-container {
+  margin-bottom: 30px;
+}
+
+.review {
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.review:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.reviewer {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-date {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+.review-rating {
+  color: #ffb400;
+  font-size: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.rating-number {
+  font-size: 0.8rem;
+  margin-top: 4px;
+  color: #aaa;
+}
+
+.review-content {
+  line-height: 1.6;
+  white-space: pre-line;
+  font-size: 0.95rem;
+}
+
+/* Movie Page Header with Action Buttons */
+.movie-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 12px 20px;
+  background-color: rgba(20, 20, 30, 0.7);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 10;
+}
+
+.go-back-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.go-back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+  background-color: white;
+}
+
+/* Header Action Buttons */
+.header-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-icon {
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.like-btn {
+  background-color: rgba(231, 76, 60, 0.9);
+  color: white;
+}
+
+.like-btn:hover {
+  background-color: #e74c3c;
+}
+
+.like-btn.active {
+  background-color: #c0392b;
+}
+
+.watched-btn {
+  background-color: rgba(46, 204, 113, 0.9);
+  color: white;
+}
+
+.watched-btn:hover {
+  background-color: #2ecc71;
+}
+
+.watched-btn.active {
+  background-color: #27ae60;
+}
+
+.playlist-btn {
+  background-color: rgba(52, 152, 219, 0.9);
+  color: white;
+}
+
+.playlist-btn:hover {
+  background-color: #3498db;
+}
+
+.playlist-btn.active {
+  background-color: #2980b9;
+}
+
+/* Playlist Dropdown */
+.playlist-dropdown-wrapper.header-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: auto;
+  margin-top: 10px;
+  z-index: 1000;
+  max-width: 300px;
+  width: auto;
 }
 
 /* Responsive adjustments */
@@ -424,4 +663,67 @@
     flex: 1 1 auto;
     min-width: 120px;
   }
+
+  .movie-page-header {
+    flex-wrap: wrap;
+  }
+  
+  .header-action-buttons {
+    margin-top: 10px;
+  }
+  
+  .playlist-dropdown-wrapper.header-dropdown {
+    right: 0;
+    left: auto;
+    width: 100%;
+    max-width: none;
+  }
+}
+
+/* Go Back Button Styling */
+.back-button-container {
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 5;
+}
+
+.page-top-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+}
+
+.top-movie-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.go-back-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.go-back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Position the dropdown for the top buttons */
+.playlist-dropdown-wrapper.top-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 10px;
+  z-index: 1000;
 }

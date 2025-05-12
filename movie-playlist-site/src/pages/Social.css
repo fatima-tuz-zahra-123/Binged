@@ -1,5 +1,7 @@
 .social-page {
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .section-description {
@@ -71,6 +73,29 @@
   align-items: center;
   gap: var(--spacing-md);
   transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.friend-card {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: rgba(20, 20, 30, 0.8);
+  border-radius: var(--radius);
+  margin-bottom: var(--spacing-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.friend-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.friend-card.active {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-bottom: 0;
+  border-bottom: 2px solid rgba(52, 152, 219, 0.5);
 }
 
 .friend-card:hover, .request-card:hover {
@@ -223,6 +248,210 @@
   justify-content: center;
 }
 
+.friend-details {
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border-bottom-left-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.taste-comparison {
+  margin-bottom: var(--spacing-lg);
+}
+
+.taste-comparison h4,
+.shared-recommendations h4 {
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
+  font-size: 1.2rem;
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.common-genres {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.common-genre-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.genre-name-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.genre-name-container span {
+  font-weight: 500;
+}
+
+.genre-match {
+  width: 100%;
+}
+
+.match-bar-wrapper {
+  height: 24px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.your-bar, .friend-bar, .overlap-indicator {
+  position: absolute;
+  height: 100%;
+  top: 0;
+}
+
+.your-bar {
+  left: 0;
+  background-color: rgba(52, 152, 219, 0.7);
+  z-index: 1;
+}
+
+.friend-bar {
+  left: 0;
+  background-color: rgba(231, 76, 60, 0.7);
+  z-index: 1;
+}
+
+.overlap-indicator {
+  left: 0;
+  background-color: rgba(46, 204, 113, 0.9);
+  z-index: 2;
+}
+
+.match-percentages {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-top: 3px;
+}
+
+.your-percent {
+  color: #3498db;
+}
+
+.overlap-percent {
+  font-weight: 500;
+  color: #2ecc71;
+}
+
+.friend-percent {
+  color: #e74c3c;
+}
+
+.genre-legend {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-xs);
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.your-color {
+  background-color: rgba(52, 152, 219, 0.7);
+}
+
+.overlap-color {
+  background-color: rgba(46, 204, 113, 0.9);
+}
+
+.friend-color {
+  background-color: rgba(231, 76, 60, 0.7);
+}
+
+.no-common-genres,
+.no-recommendations {
+  padding: var(--spacing-md);
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.recommended-movie {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: rgba(20, 20, 30, 0.5);
+}
+
+.recommended-movie:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.recommended-movie img {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  display: block;
+}
+
+.recommended-movie .movie-info {
+  padding: var(--spacing-xs);
+}
+
+.recommended-movie h5 {
+  margin: var(--spacing-xs) 0;
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.recommended-movie .movie-rating {
+  font-size: 0.85rem;
+  color: #f1c40f;
+}
+
+.expand-button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px;
+  height: 30px;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.expand-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 @media (max-width: 768px) {
   .friends-grid {
     grid-template-columns: 1fr;
@@ -230,5 +459,18 @@
   
   .friend-actions, .request-actions, .user-actions {
     flex-direction: column;
+  }
+
+  .recommendations-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: var(--spacing-sm);
+  }
+  
+  .match-percentages {
+    font-size: 0.75rem;
+  }
+  
+  .friend-details {
+    padding: var(--spacing-sm);
   }
 }

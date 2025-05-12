@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Pie } from 'react-chartjs-2';
 import './Profile.css';
 
+ChartJS.register(ArcElement, Tooltip, Legend);
+
 const Profile = () => {
-  const { currentUser, updateProfile, logout } = useUser();
+  const { currentUser, updateProfile, logout, calculateUserTasteProfile } = useUser();
   const { themeColors } = useTheme();
   
   const [formData, setFormData] = useState({
@@ -24,6 +28,7 @@ const Profile = () => {
     totalPlaylists: 0,
     totalFriends: 0
   });
+  const [tasteProfile, setTasteProfile] = useState({});
   
   // Genres list
   const genres = [
@@ -50,8 +55,12 @@ const Profile = () => {
       const totalFriends = 0; // We would calculate friends count from context
       
       setStats({ totalMovies, totalPlaylists, totalFriends });
+
+      // Calculate taste profile from watched and liked movies
+      const profile = calculateUserTasteProfile();
+      setTasteProfile(profile);
     }
-  }, [currentUser]);
+  }, [currentUser, calculateUserTasteProfile]);
   
   // Theme-based styles
   const pageStyle = {
@@ -235,6 +244,88 @@ const Profile = () => {
             <p>{currentUser.bio || 'No bio added yet.'}</p>
           </div>
           
+          {/* Taste Profile Section */}
+          <div className="profile-section taste-profile-section" style={sectionStyle}>
+            <h3 style={{color: themeColors.primary}}>Taste Profile</h3>
+            <p className="section-description">Based on your watched and liked movies</p>
+            
+            {Object.keys(tasteProfile).length > 0 ? (
+              <div className="taste-profile-chart">
+                <Pie
+                  data={{
+                    labels: Object.keys(tasteProfile),
+                    datasets: [
+                      {
+                        data: Object.values(tasteProfile),
+                        backgroundColor: Object.keys(tasteProfile).map((_, index, array) => {
+                          // Create a range of blue shades from primary blue (#2962ff) to lighter blue (#82b1ff)
+                          const baseHue = 220; // Blue hue
+                          const saturation = 85;
+                          const minLightness = 45;
+                          const maxLightness = 75;
+                          // Calculate position in the array to determine lightness value
+                          const lightness = minLightness + ((maxLightness - minLightness) * (index / Math.max(array.length - 1, 1)));
+                          return `hsl(${baseHue}, ${saturation}%, ${lightness}%)`;
+                        }),
+                        borderWidth: 2,
+                        borderColor: themeColors.surface,
+                        hoverBorderColor: themeColors.primary,
+                        hoverBorderWidth: 3,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                      legend: {
+                        position: 'right',
+                        labels: {
+                          color: themeColors.text,
+                          padding: 15,
+                          usePointStyle: true,
+                          font: {
+                            size: 12
+                          }
+                        },
+                        title: {
+                          display: true,
+                          text: 'Movie Genres',
+                          color: themeColors.textSecondary,
+                          font: {
+                            size: 14,
+                            weight: 'normal'
+                          }
+                        }
+                      },
+                      tooltip: {
+                        backgroundColor: `${themeColors.surface}E6`,
+                        titleColor: themeColors.primary,
+                        bodyColor: themeColors.text,
+                        borderColor: themeColors.primary,
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: true,
+                        callbacks: {
+                          title: (tooltipItems) => {
+                            return tooltipItems[0].label;
+                          },
+                          label: (context) => {
+                            return `${context.formattedValue}% of your movies`;
+                          }
+                        }
+                      }
+                    },
+                  }}
+                />
+              </div>
+            ) : (
+              <p className="empty-profile-message">
+                Your taste profile will appear here after you've watched or liked some movies.
+              </p>
+            )}
+          </div>
+
           <div className="profile-section" style={sectionStyle}>
             <h3 style={{color: themeColors.primary}}>Favorite Genres</h3>
             <div className="genre-tags">

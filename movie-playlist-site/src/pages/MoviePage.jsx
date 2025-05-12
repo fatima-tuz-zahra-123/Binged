@@ -6,10 +6,37 @@ import { getMovieDetails, getMovieCredits, getMovieReviews } from '../services/t
 import PlaylistDropdown from '../components/PlaylistDropdown';
 import './MoviePage.css';
 
+// Star Rating Component
+const StarRating = ({ rating, setRating }) => {
+  const [hover, setHover] = useState(0);
+  
+  return (
+    <div className="star-rating">
+      {[...Array(10)].map((_, index) => {
+        const ratingValue = index + 1;
+        
+        return (
+          <button
+            type="button"
+            key={ratingValue}
+            className={`star-btn ${ratingValue <= (hover || rating) ? "active" : ""}`}
+            onClick={() => setRating(ratingValue)}
+            onMouseEnter={() => setHover(ratingValue)}
+            onMouseLeave={() => setHover(0)}
+          >
+            <span className="star">★</span>
+          </button>
+        );
+      })}
+      <span className="rating-value">{rating}/10</span>
+    </div>
+  );
+};
+
 const MoviePage = () => {
   const { movieId } = useParams();
   const { themeColors } = useTheme();
-  const { currentUser } = useUser();
+  const { currentUser, addToDefaultPlaylist } = useUser();
   const navigate = useNavigate();
   
   const [movie, setMovie] = useState(null);
@@ -21,6 +48,9 @@ const MoviePage = () => {
   const [showAddToPlaylist, setShowAddToPlaylist] = useState(false);
   const [newReview, setNewReview] = useState('');
   const [newRating, setNewRating] = useState(5);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isWatched, setIsWatched] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     const fetchMovieData = async () => {
@@ -58,6 +88,29 @@ const MoviePage = () => {
     fetchMovieData();
   }, [movieId]);
 
+  // Check if movie is in liked/watched playlists when component mounts
+  useEffect(() => {
+    if (currentUser && currentUser.playlists && movie) {
+      // Check if in Liked playlist
+      const likedPlaylist = currentUser.playlists.find(p => p.name === 'Liked');
+      if (likedPlaylist) {
+        const isInLiked = likedPlaylist.movies.some(m => m.id === movie.id);
+        setIsLiked(isInLiked);
+      }
+      
+      // Check if in Watched playlist
+      const watchedPlaylist = currentUser.playlists.find(p => p.name === 'Watched');
+      if (watchedPlaylist) {
+        const isInWatched = watchedPlaylist.movies.some(m => m.id === movie.id);
+        setIsWatched(isInWatched);
+      }
+    }
+  }, [currentUser, movie]);
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   const handleAddToPlaylist = () => {
     if (currentUser) {
       setShowAddToPlaylist(!showAddToPlaylist);
@@ -67,10 +120,48 @@ const MoviePage = () => {
       }
     }
   };
+
+  const handleLikeClick = () => {
+    if (!currentUser) {
+      // If no user is logged in, prompt to login
+      if (window.confirm('Please log in to like movies. Go to login page?')) {
+        navigate('/login');
+      }
+      return;
+    }
+    
+    // Toggle liked state
+    const newLikedState = !isLiked;
+    setIsLiked(newLikedState);
+    
+    // Add to or remove from default "Liked" playlist
+    addToDefaultPlaylist(movie, 'Liked', newLikedState);
+  };
+  
+  const handleWatchedClick = () => {
+    if (!currentUser) {
+      // If no user is logged in, prompt to login
+      if (window.confirm('Please log in to mark movies as watched. Go to login page?')) {
+        navigate('/login');
+      }
+      return;
+    }
+    
+    // Toggle watched state
+    const newWatchedState = !isWatched;
+    setIsWatched(newWatchedState);
+    
+    // Add to or remove from default "Watched" playlist
+    addToDefaultPlaylist(movie, 'Watched', newWatchedState);
+  };
   
   const handlePlaylistSelected = (playlistId) => {
     setShowAddToPlaylist(false);
-    // Implementation would connect to your playlists state management
+    setIsAdding(true);
+    // Show checkmark for 1.5 seconds
+    setTimeout(() => {
+      setIsAdding(false);
+    }, 1500);
     console.log(`Movie ${movie.title} added to playlist with ID: ${playlistId}`);
   };
   
@@ -152,25 +243,46 @@ const MoviePage = () => {
 
   return (
     <div className="movie-page" style={{ backgroundColor: themeColors.background }}>
-      {backdropUrl && (
-        <div className="backdrop" style={{ backgroundImage: `url(${backdropUrl})` }}>
-          <div className="backdrop-overlay" style={{ backgroundColor: `${themeColors.background}CC` }}></div>
-        </div>
-      )}
-      
-      <div className="movie-content">
-        <div className="movie-header">
-          <div className="poster-container">
-            <img src={posterUrl} alt={movie.title} className="movie-poster" />
+      {/* Header with Go Back Button and Action Buttons */}
+      <div className="movie-page-header">
+        <button 
+          onClick={handleGoBack} 
+          className="go-back-btn"
+        >
+          ← Back
+        </button>
+        
+        {movie && (
+          <div className="header-action-buttons">
             <button 
-              className="add-to-playlist-btn" 
-              onClick={handleAddToPlaylist}
-              style={{ backgroundColor: themeColors.primary }}
+              className={`action-btn like-btn ${isLiked ? 'active' : ''}`}
+              onClick={handleLikeClick}
+              aria-label={isLiked ? "Remove from liked" : "Add to liked"}
+              title={isLiked ? "Unlike" : "Like"}
             >
-              Add to Playlist
+              <span className="btn-icon">{isLiked ? '♥' : '♡'}</span>
             </button>
+            
+            <button 
+              className={`action-btn watched-btn ${isWatched ? 'active' : ''}`}
+              onClick={handleWatchedClick}
+              aria-label={isWatched ? "Remove from watched" : "Add to watched"}
+              title={isWatched ? "Unmark as watched" : "Mark as watched"}
+            >
+              <span className="btn-icon">{isWatched ? '✓' : '👁️'}</span>
+            </button>
+            
+            <button 
+              className={`action-btn playlist-btn ${isAdding ? 'active' : ''}`}
+              onClick={handleAddToPlaylist}
+              aria-label="Add to playlist"
+              title="Add to playlist"
+            >
+              <span className="btn-icon">{isAdding ? '✓' : '+'}</span>
+            </button>
+            
             {showAddToPlaylist && (
-              <div className="playlist-dropdown-wrapper">
+              <div className="playlist-dropdown-wrapper header-dropdown">
                 <PlaylistDropdown
                   movie={movie}
                   onPlaylistSelected={handlePlaylistSelected}
@@ -178,6 +290,22 @@ const MoviePage = () => {
                 />
               </div>
             )}
+          </div>
+        )}
+      </div>
+
+      {/* Backdrop */}
+      {backdropUrl && (
+        <div className="backdrop" style={{ backgroundImage: `url(${backdropUrl})` }}>
+          <div className="backdrop-overlay" style={{ backgroundColor: `${themeColors.background}CC` }}></div>
+        </div>
+      )}
+      
+      {/* Movie Content */}
+      <div className="movie-content">
+        <div className="movie-header">
+          <div className="poster-container">
+            <img src={posterUrl} alt={movie.title} className="movie-poster" />
           </div>
           
           <div className="movie-info">
@@ -261,17 +389,7 @@ const MoviePage = () => {
               
               <div className="rating-input">
                 <label>Your Rating:</label>
-                <select 
-                  value={newRating} 
-                  onChange={(e) => setNewRating(Number(e.target.value))}
-                  style={{ backgroundColor: themeColors.surface, color: themeColors.text }}
-                >
-                  {[10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(num => (
-                    <option key={num} value={num}>
-                      {num} {num === 1 ? 'star' : 'stars'}
-                    </option>
-                  ))}
-                </select>
+                <StarRating rating={newRating} setRating={setNewRating} />
               </div>
               
               <textarea
@@ -295,7 +413,7 @@ const MoviePage = () => {
           <div className="reviews-list">
             {/* User reviews */}
             {userReviews.length > 0 && (
-              <>
+              <div className="reviews-container">
                 <h3>User Reviews</h3>
                 {userReviews.map(review => (
                   <div key={review.id} className="review" style={{ backgroundColor: themeColors.surface }}>
@@ -306,17 +424,17 @@ const MoviePage = () => {
                           {new Date(review.created_at).toLocaleDateString()}
                         </span>
                       </div>
-                      <div className="review-rating">⭐ {review.rating}/10</div>
+                      <div className="review-rating">{'★'.repeat(review.rating)} <span className="rating-number">{review.rating}/10</span></div>
                     </div>
                     <div className="review-content">{review.content}</div>
                   </div>
                 ))}
-              </>
+              </div>
             )}
             
             {/* TMDB reviews */}
             {reviews.length > 0 && (
-              <>
+              <div className="reviews-container">
                 <h3>TMDB Reviews</h3>
                 {reviews.map(review => (
                   <div key={review.id} className="review" style={{ backgroundColor: themeColors.surface }}>
@@ -328,13 +446,16 @@ const MoviePage = () => {
                         </span>
                       </div>
                       {review.author_details && review.author_details.rating && (
-                        <div className="review-rating">⭐ {review.author_details.rating}/10</div>
+                        <div className="review-rating">
+                          {'★'.repeat(Math.min(Math.round(review.author_details.rating/2), 5))}
+                          <span className="rating-number">{review.author_details.rating}/10</span>
+                        </div>
                       )}
                     </div>
                     <div className="review-content">{review.content}</div>
                   </div>
                 ))}
-              </>
+              </div>
             )}
             
             {reviews.length === 0 && userReviews.length === 0 && (

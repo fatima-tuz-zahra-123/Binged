@@ -10,6 +10,34 @@
   pointer-events: auto; /* Ensure pointer events work */
 }
 
+/* Light mode specific styles for better readability */
+[data-theme="light"] .navbar {
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 3px 10px rgba(41, 98, 255, 0.1);
+}
+
+[data-theme="light"] .nav-links a {
+  color: #0a0a19; /* Darker text color in light mode */
+}
+
+[data-theme="light"] .nav-links a:hover {
+  background-color: rgba(41, 98, 255, 0.08);
+  color: #2962ff;
+}
+
+[data-theme="light"] .nav-links a.active {
+  color: #2962ff;
+}
+
+[data-theme="light"] .auth-link {
+  color: #0a0a19;
+}
+
+[data-theme="light"] .auth-link:hover {
+  background-color: rgba(41, 98, 255, 0.08);
+  color: #2962ff;
+}
+
 .navbar-container {
   display: flex;
   justify-content: space-between;

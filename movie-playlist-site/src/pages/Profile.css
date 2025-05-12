@@ -79,6 +79,69 @@
   margin-bottom: var(--spacing-sm);
 }
 
+/* Taste Profile Styles */
+.taste-profile-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.section-description {
+  color: var(--textSecondary);
+  margin-bottom: var(--spacing-md);
+  font-size: 0.9rem;
+}
+
+.genre-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: var(--spacing-md);
+}
+
+.genre-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.genre-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.genre-name {
+  font-weight: 500;
+}
+
+.genre-percentage {
+  color: var(--textSecondary);
+}
+
+.genre-bar-wrapper {
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.genre-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease-out;
+}
+
+.empty-profile-message {
+  padding: var(--spacing-lg);
+  text-align: center;
+  color: var(--textSecondary);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  font-style: italic;
+  margin: var(--spacing-md) auto;
+  max-width: 400px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
 .genre-tags {
   display: flex;
   flex-wrap: wrap;
@@ -150,6 +213,81 @@
   color: #e74c3c;
 }
 
+.taste-profile-description {
+  margin-bottom: var(--spacing-md);
+  color: var(--textSecondary);
+  font-size: 0.95rem;
+}
+
+/* Taste Profile Chart Styles */
+.taste-profile-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) auto;
+  max-width: 500px;
+  position: relative;
+}
+
+.taste-profile-chart canvas {
+  margin: var(--spacing-md) auto;
+  max-height: 350px !important;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.15));
+  transition: all 0.3s ease;
+}
+
+.taste-profile-chart canvas:hover {
+  filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.25));
+}
+
+.taste-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.taste-genre {
+  min-width: 100px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.taste-bar-wrapper {
+  flex-grow: 1;
+  height: 24px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.taste-bar {
+  height: 100%;
+  border-radius: 12px;
+  transition: width 1s ease-out;
+}
+
+.taste-percentage {
+  position: absolute;
+  right: 10px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  mix-blend-mode: difference;
+}
+
+.no-taste-profile {
+  padding: var(--spacing-md);
+  background-color: rgba(52, 152, 219, 0.1);
+  border-left: 3px solid #3498db;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
 @media (max-width: 768px) {
   .profile-header {
     flex-direction: column;
@@ -171,5 +309,27 @@
   
   .genre-selector {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+  
+  .taste-bar-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .taste-genre {
+    min-width: auto;
+  }
+  
+  .taste-bar-wrapper {
+    width: 100%;
+  }
+  
+  .taste-profile-chart {
+    padding: var(--spacing-sm);
+  }
+  
+  .taste-profile-chart canvas {
+    max-height: 280px !important;
   }
 }

@@ -73,18 +73,30 @@
 
 .add-to-playlist-btn {
   width: 100%;
-  padding: 12px;
-  border: none;
+  padding: 12px 16px;
   border-radius: 8px;
-  font-weight: bold;
+  font-weight: 600;
+  background-color: rgba(52, 152, 219, 0.3);
+  border: 2px solid #3498db;
+  color: #3498db;
   cursor: pointer;
   margin-top: 15px;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .add-to-playlist-btn:hover {
   transform: translateY(-3px);
   opacity: 0.9;
+}
+
+.add-to-playlist-btn.active {
+  background-color: #3498db;
+  color: white;
+  border: 2px solid transparent;
 }
 
 .playlist-dropdown-wrapper {
@@ -339,6 +351,70 @@
   padding: 30px;
   background-color: rgba(20, 20, 20, 0.5);
   border-radius: 12px;
+}
+
+/* Movie Actions Styling */
+.movie-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+  opacity: 1 !important; /* Force visibility */
+  visibility: visible !important; /* Force visibility */
+  position: relative;
+  z-index: 5; /* Ensure it's above other elements */
+}
+
+.watched-btn, .like-btn, .add-to-playlist-btn {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  gap: 8px;
+  border-width: 2px;
+  border-style: solid;
+}
+
+.watched-btn:hover, .like-btn:hover, .add-to-playlist-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+}
+
+.watched-btn {
+  background-color: rgba(46, 204, 113, 0.3); 
+  border: 2px solid #2ecc71;
+  color: #2ecc71;
+}
+
+.watched-btn.active {
+  background-color: #2ecc71;
+  color: white;
+  border: 2px solid transparent;
+}
+
+.like-btn {
+  background-color: rgba(231, 76, 60, 0.3);
+  border: 2px solid #e74c3c;
+  color: #e74c3c;
+}
+
+.like-btn.active {
+  background-color: #e74c3c;
+  color: white;
+  border: 2px solid transparent;
+}
+
+.heart-icon, .watched-icon, .add-icon {
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Responsive adjustments */
